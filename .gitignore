@@ -44,3 +44,6 @@ next-env.d.ts
 bun.lockb
 bun-debug.log*
 .bun/
+
+# env
+.env
