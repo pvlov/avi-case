@@ -14,12 +14,12 @@ function convertMedicalDocumentToTimeline(doc: MedicalDocument): TimelineItem {
   const docId = crypto.randomUUID();
   return {
     id: crypto.randomUUID(),
-    date: new Date(doc.dateIssued || ""),
-    type: "document",
-    title: doc.generatedTitle || "",
-    description: doc.diagnosis.join(", "),
-    doctorName: doc.doctorName || "",
-    documentId: docId,
+    date: new Date(doc.dateIssued || ''),
+    type: 'document',
+    title: doc.diagnosis.join(', ') || 'Medical Document',
+    description: doc.diagnosis.join(', '),
+    doctorName: doc.doctorName || '',
+    documentId: docId
   };
 }
 
@@ -57,7 +57,7 @@ function convertVaccinationToCategory(vac: Vaccination): CategoryItem & Partial<
 function convertLabResultsToCategory(doc: MedicalDocument, docId: string): CategoryItem[] {
   return doc.lab_parameters.map((lab) => ({
     id: crypto.randomUUID(),
-    title: lab,
+    title: `${lab.name}: ${lab.quantity} ${lab.unit}`,
     date: new Date(doc.dateIssued || ""),
     type: "labresult",
     documentId: docId,
@@ -83,6 +83,7 @@ export async function fetchMedicalData(): Promise<MedicalData> {
           blood_pressure: null,
           heart_rate: null,
           temperature_c: null,
+          respiratory_rate: null
         },
         anamnesis: null,
         statusAtAdmission: null,
@@ -90,7 +91,10 @@ export async function fetchMedicalData(): Promise<MedicalData> {
         therapy: [],
         progress: null,
         ekg: { date: null, details: null },
-        lab_parameters: ["Blood Count: Normal", "CRP: Slightly Elevated"],
+        lab_parameters: [
+          { name: "Blood Count", quantity: 1, unit: "Normal" },
+          { name: "CRP", quantity: 1, unit: "Slightly Elevated" }
+        ],
         procedures: [
           {
             name: "Blood Test",
@@ -105,7 +109,6 @@ export async function fetchMedicalData(): Promise<MedicalData> {
             findings: "Normal sinus rhythm",
           },
         ],
-        planned_procedures: [],
         medications: [
           {
             name: "Ibuprofen",
@@ -138,6 +141,7 @@ export async function fetchMedicalData(): Promise<MedicalData> {
           blood_pressure: null,
           heart_rate: null,
           temperature_c: null,
+          respiratory_rate: null
         },
         anamnesis: null,
         statusAtAdmission: null,
@@ -145,7 +149,10 @@ export async function fetchMedicalData(): Promise<MedicalData> {
         therapy: [],
         progress: null,
         ekg: { date: null, details: null },
-        lab_parameters: ["Blood Count: Normal", "CRP: Slightly Elevated"],
+        lab_parameters: [
+          { name: "Blood Count", quantity: 1, unit: "Normal" },
+          { name: "CRP", quantity: 1, unit: "Slightly Elevated" }
+        ],
         procedures: [
           {
             name: "ECG",
@@ -154,7 +161,6 @@ export async function fetchMedicalData(): Promise<MedicalData> {
             findings: "Normal sinus rhythm, no abnormalities",
           },
         ],
-        planned_procedures: [],
         medications: [
           {
             name: "Lisinopril",
@@ -181,6 +187,7 @@ export async function fetchMedicalData(): Promise<MedicalData> {
           blood_pressure: null,
           heart_rate: null,
           temperature_c: null,
+          respiratory_rate: null
         },
         anamnesis: null,
         statusAtAdmission: null,
@@ -188,7 +195,10 @@ export async function fetchMedicalData(): Promise<MedicalData> {
         therapy: [],
         progress: null,
         ekg: { date: null, details: null },
-        lab_parameters: ["Blood Count: Normal", "CRP: Slightly Elevated"],
+        lab_parameters: [
+          { name: "Blood Count", quantity: 1, unit: "Normal" },
+          { name: "CRP", quantity: 1, unit: "Slightly Elevated" }
+        ],
         procedures: [
           {
             name: "Knee X-Ray",
@@ -197,7 +207,6 @@ export async function fetchMedicalData(): Promise<MedicalData> {
             findings: "Mild joint space narrowing",
           },
         ],
-        planned_procedures: [],
         medications: [
           {
             name: "Diclofenac",
@@ -224,6 +233,7 @@ export async function fetchMedicalData(): Promise<MedicalData> {
           blood_pressure: null,
           heart_rate: null,
           temperature_c: null,
+          respiratory_rate: null
         },
         anamnesis: null,
         statusAtAdmission: null,
@@ -231,7 +241,10 @@ export async function fetchMedicalData(): Promise<MedicalData> {
         therapy: [],
         progress: null,
         ekg: { date: null, details: null },
-        lab_parameters: ["Blood Count: Normal", "CRP: Slightly Elevated"],
+        lab_parameters: [
+          { name: "Blood Count", quantity: 1, unit: "Normal" },
+          { name: "CRP", quantity: 1, unit: "Slightly Elevated" }
+        ],
         procedures: [
           {
             name: "Skin Biopsy",
@@ -240,7 +253,6 @@ export async function fetchMedicalData(): Promise<MedicalData> {
             findings: "Benign, no malignancy",
           },
         ],
-        planned_procedures: [],
         medications: [
           {
             name: "Hydrocortisone Cream",
@@ -299,8 +311,8 @@ export async function fetchMedicalData(): Promise<MedicalData> {
         date: new Date(proc.date || ""),
         type: "procedure",
         documentId: timelineItems[index].documentId,
-        indication: proc.indication,
-        findings: proc.findings,
+        indication: proc.indication || undefined,
+        findings: proc.findings || undefined,
       })),
     );
 
@@ -321,7 +333,7 @@ export async function fetchMedicalData(): Promise<MedicalData> {
           validFrom: new Date("2024-01-01"),
           validTo: new Date("2024-12-31"),
           cardSerialNumber: "123456789",
-          cardNumber: "987654321",
+          cardNumber: "987654321"
         },
       },
     };
@@ -344,7 +356,7 @@ export async function fetchMedicalData(): Promise<MedicalData> {
           validFrom: new Date("2024-01-01"),
           validTo: new Date("2024-12-31"),
           cardSerialNumber: "123456789",
-          cardNumber: "987654321",
+          cardNumber: "987654321"
         },
       },
     };

@@ -18,39 +18,45 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { useState } from "react";
 
 interface VaccinationTableProps {
   data: VaccinationPass | null;
   onEditVaccination: (index: number) => void;
   onAddVaccination: () => void;
+  editable?: boolean;
 }
 
-function formatDate(dateString: string | null | undefined): string {
-  if (!dateString) return "N/A";
-  const date = new Date(dateString);
-  return isNaN(date.getTime())
-    ? dateString
-    : date.toLocaleDateString("en-US", {
-        year: "numeric",
-        month: "short",
-        day: "numeric",
-      });
+function formatDate(date: Date | string | null | undefined): string {
+  if (!date) return "N/A";
+
+  try {
+    const dateObj = date instanceof Date ? date : new Date(date);
+    return dateObj.toLocaleDateString("en-US", {
+      year: "numeric",
+      month: "short",
+      day: "numeric",
+    });
+  } catch {
+    return "N/A";
+  }
 }
 
 export function VaccinationTable({
   data,
   onEditVaccination,
   onAddVaccination,
+  editable = true
 }: VaccinationTableProps) {
   if (!data || data.vaccinations.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center py-8 text-center">
-        <p className="text-muted-foreground mb-4">
-          No vaccination records found.
-        </p>
-        <Button onClick={onAddVaccination} variant="default" className="gap-2">
-          <Plus className="h-4 w-4" />
-        </Button>
+        <p className="text-muted-foreground mb-4">No vaccination records found.</p>
+        {editable && (
+          <Button onClick={onAddVaccination} variant="default" className="gap-2">
+            <Plus className="h-4 w-4" />
+          </Button>
+        )}
       </div>
     );
   }
@@ -128,7 +134,7 @@ export function VaccinationTable({
               <TableHead>Trade Name</TableHead>
               <TableHead>Batch Number</TableHead>
               <TableHead>Doctor</TableHead>
-              <TableHead className="w-[50px]">Actions</TableHead>
+              {editable && <TableHead className="w-[50px]">Actions</TableHead>}
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -139,20 +145,22 @@ export function VaccinationTable({
                     {vax.vaccine}
                   </Badge>
                 </TableCell>
-                <TableCell>{formatDate(vax.date)}</TableCell>
+                <TableCell>{vax.date ? formatDate(vax.date) : "N/A"}</TableCell>
                 <TableCell>{vax.trade_name || "N/A"}</TableCell>
                 <TableCell>{vax.batch_number || "N/A"}</TableCell>
                 <TableCell>{vax.doctor || "N/A"}</TableCell>
-                <TableCell>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => onEditVaccination(index)}
-                    className="h-8 w-8 p-0"
-                  >
-                    <Pencil className="h-4 w-4" />
-                  </Button>
-                </TableCell>
+                {editable && (
+                  <TableCell>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => onEditVaccination(index)}
+                      className="h-8 w-8 p-0"
+                    >
+                      <Pencil className="h-4 w-4" />
+                    </Button>
+                  </TableCell>
+                )}
               </TableRow>
             ))}
           </TableBody>
