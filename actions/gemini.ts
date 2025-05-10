@@ -4,7 +4,7 @@ import { GoogleGenAI, createPartFromUri } from "@google/genai";
 import { ContentListUnion } from "@google/genai/node";
 import { randomUUID, UUID } from "crypto";
 import { Result, ok, err, UploadInfo, flatten } from "../types/util";
-import { DocType, MedicalDocument } from "../types/medical";
+import { DocType } from "../types/medical";
 
 enum FileState {
   PROCESSING = "PROCESSING",
@@ -270,7 +270,7 @@ export const parseDocuments = async <T>(formData: FormData): Promise<Result<T, s
     return err(text.error);
   }
 
-  const content: ContentListUnion = [PROMPTS[documentType] || PROMPTS.raw, text.value!];
+  const content: ContentListUnion = [PROMPTS[documentType] || PROMPTS[DocType.RAW], text.value!];
 
   // Send it all off to Gemini
   const response = await ai.models.generateContent({
