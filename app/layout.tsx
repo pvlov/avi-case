@@ -3,6 +3,7 @@ import "@/styles/globals.css";
 import { Navbar } from "@/components/Navbar";
 import { ThemeProvider } from "@/components/theme-provider";
 import { Inter } from "next/font/google";
+import { MedicalStoreProvider } from "@/lib/MedicalStoreProvider";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -28,8 +29,10 @@ export default function RootLayout({
           enableSystem
           disableTransitionOnChange
         >
-          <Navbar />
-          <main className="pt-12">{children}</main>
+          <MedicalStoreProvider>
+            <Navbar />
+            <main className="pt-12">{children}</main>
+          </MedicalStoreProvider>
         </ThemeProvider>
       </body>
     </html>
