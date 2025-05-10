@@ -59,7 +59,7 @@ const PROMPTS: Record<DocType, string> = {
     If any fields are missing or unclear, use null.
   `,
   [DocType.DOCUMENT]: `
-    You are given one or more images of German-language doctor’s notes as text.
+    You are given one or more images of German-language doctor's notes as text.
     Your task is to extract all relevant medical information and output it as a structured JSON object following the exact schema below.
     Try to merge the different pages separated by ----- into one coherent document.
     The date is of utmost importance and usually located at the top of the page.
@@ -112,7 +112,7 @@ const PROMPTS: Record<DocType, string> = {
       discharge_notes: string | null;
     }
     All fields must be present. If a particular piece of information is missing or cannot be determined, use null for string or number fields, and use an empty array ([]) for list fields.
-    For numeric fields (height_cm, weight_kg, bmi, heart_rate, temperature_c), output a number (strip units if present) or null. For example, if the note says “75 kg”, output 75 (as a number) for weight_kg.
+    For numeric fields (height_cm, weight_kg, bmi, heart_rate, temperature_c), output a number (strip units if present) or null. For example, if the note says "75 kg", output 75 (as a number) for weight_kg.
     For list fields (diagnosis, therapy, lab_parameters, medications), output an array of strings. If there are multiple diagnoses or therapies, include each as a separate string. If none are present, use an empty array.
     For the procedures array, each entry must be an object with keys "name", "date", "indication", and "findings". Fill each with the relevant text (or null if not available). If no procedures are listed, use an empty array.
     Keep the field names exactly as shown (in English).
@@ -139,7 +139,7 @@ const PROMPTS: Record<DocType, string> = {
     3. *Missing or unreadable data* – if a field is missing or illegible in the OCR/text/codes, set its value to *null. Do **not* guess or invent values.
     4. *Validation* –
       - Dates must conform to ISO-8601 (YYYY-MM-DD or YYYY-MM).
-      - 'insurerId' must be purely numeric; correct obvious OCR errors (e.g. “O”→“0”), but if still uncertain, use null.
+      - 'insurerId' must be purely numeric; correct obvious OCR errors (e.g. "O"→"0"), but if still uncertain, use null.
     5. *No extra keys* – do not include any fields outside the schema above.
     6. *Accuracy* – expand any known abbreviations in insurer names to the full official name.
 
@@ -215,7 +215,7 @@ export const uploadFiles = async (blobs: Blob[]): Promise<Result<UploadInfo[], s
     return flatten(uploadedFiles);
   } catch (error) {
     // Short-circuit on first failure
-    return err(error.message);
+    return err(error instanceof Error ? error.message : 'Unknown error occurred');
   }
 };
 
@@ -281,7 +281,36 @@ export const parseDocuments = async <T>(formData: FormData): Promise<Result<T, s
   }
 
   try {
-    return ok(JSON.parse(stripFirstAndLastLine(response.text)) as T);
+    let parsedData = JSON.parse(stripFirstAndLastLine(response.text)) as any;
+    
+    // Transform date strings to Date objects based on document type
+    if (documentType === DocType.VACCINEPASS) {
+      if (parsedData.vaccinations && Array.isArray(parsedData.vaccinations)) {
+        // Convert date strings to Date objects in vaccinations array
+        parsedData.vaccinations = parsedData.vaccinations.map((vaccination: any) => ({
+          ...vaccination,
+          date: vaccination.date ? new Date(vaccination.date) : null,
+        }));
+      }
+      
+      if (parsedData.special_tests && Array.isArray(parsedData.special_tests)) {
+        // Convert date strings to Date objects in special_tests array
+        parsedData.special_tests = parsedData.special_tests.map((test: any) => ({
+          ...test,
+          date: test.date ? new Date(test.date) : null,
+        }));
+      }
+    } else if (documentType === DocType.INSURANCECARD) {
+      // Handle insurance card dates
+      if (parsedData.dateOfBirth) {
+        parsedData.dateOfBirth = new Date(parsedData.dateOfBirth);
+      }
+      if (parsedData.validUntil) {
+        parsedData.validUntil = new Date(parsedData.validUntil);
+      }
+    }
+    
+    return ok(parsedData as T);
   } catch (e) {
     console.log(response.text);
     return err("Invalid JSON response from Gemini: " + e);

@@ -48,27 +48,57 @@ type FormValues = z.infer<typeof formSchema>;
 
 interface InsuranceStepFormProps {
   onSubmit?: (data: InsuranceCard) => void;
+  defaultValues?: InsuranceCard;
+  isEdit?: boolean;
 }
 
-export function InsuranceStepForm({ onSubmit }: InsuranceStepFormProps) {
+export function InsuranceStepForm({ 
+  onSubmit, 
+  defaultValues,
+  isEdit = false 
+}: InsuranceStepFormProps) {
+  // Format dates properly for the form
+  const formattedDefaultValues = defaultValues 
+    ? {
+        insurerName: defaultValues.insuranceName,
+        insurerId: defaultValues.insuranceNumber,
+        memberId: defaultValues.personalNumber,
+        givenName: defaultValues.givenName,
+        familyName: defaultValues.familyName,
+        // Format dates as YYYY-MM-DD for input type="date"
+        dateOfBirth: defaultValues.dateOfBirth instanceof Date 
+          ? defaultValues.dateOfBirth.toISOString().split('T')[0] 
+          : new Date(defaultValues.dateOfBirth).toISOString().split('T')[0],
+        validUntil: defaultValues.validUntil instanceof Date 
+          ? defaultValues.validUntil.toISOString().split('T')[0] 
+          : new Date(defaultValues.validUntil).toISOString().split('T')[0],
+        cardNumber: defaultValues.cardNumber,
+      }
+    : {
+        insurerName: "",
+        insurerId: "",
+        memberId: "",
+        givenName: "",
+        familyName: "",
+        dateOfBirth: "",
+        validUntil: "",
+        cardNumber: "",
+      };
+
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
-    defaultValues: {
-      insurerName: "",
-      insurerId: "",
-      memberId: "",
-      givenName: "",
-      familyName: "",
-      dateOfBirth: "",
-      validUntil: "",
-      cardNumber: "",
-    },
+    defaultValues: formattedDefaultValues,
   });
 
   function handleSubmit(values: FormValues) {
     const data: InsuranceCard = {
-      ...values,
+      givenName: values.givenName,
+      familyName: values.familyName,
       dateOfBirth: new Date(values.dateOfBirth),
+      personalNumber: values.memberId,
+      insuranceNumber: values.insurerId,
+      insuranceName: values.insurerName,
+      cardNumber: values.cardNumber,
       validUntil: new Date(values.validUntil),
     };
 
@@ -218,9 +248,11 @@ export function InsuranceStepForm({ onSubmit }: InsuranceStepFormProps) {
           </div>
         </div>
 
-        <Button type="submit" className="flex justify-end" onClick={handleSubmit}>
-          Submit
-        </Button>
+        <div className="flex justify-end">
+          <Button type="submit">
+            {isEdit ? 'Update Insurance Information' : 'Save Insurance Information'}
+          </Button>
+        </div>
       </form>
     </Form>
   );
