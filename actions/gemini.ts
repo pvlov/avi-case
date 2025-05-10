@@ -13,7 +13,7 @@ enum FileState {
 const PROMPTS: Record<string, string> = {
   vaccinepass: `
     You are a medical data assistant. Analyze the attached images of a German vaccination pass (Impfpass).
-
+    ***IMPORTANT: EXTRACT VACCINATION NAME ONLY FROM THE INDIVIDUAL STICKERS.*** Do NOT use any printed headers, titles, or sheet information. Only use the content visible directly on each vaccination sticker (vaccine name).
     Extract all vaccination entries and present them in valid JSON format.
 
     Please follow this structure:
@@ -39,7 +39,7 @@ const PROMPTS: Record<string, string> = {
         {
           "type": "Tuberculosis" | "Yellow Fever" | "Hepatitis B" | ...,
           "date": "YYYY-MM-DD",
-          "result": "string or null",
+          "reaction": "string or null",
           "issuer": "string or null"
         }
       ],
@@ -49,7 +49,7 @@ const PROMPTS: Record<string, string> = {
     }
 
     Please:
-    - Include every dose as a separate entry.
+    - ***IMPORTANT:Include every dose as a separate entry. ONLY FROM STICKERS.***
     - Parse vaccine names from stamps/stickers or handwritten labels.
     - Include entries like yellow fever and COVID.
     - Translate German terms where helpful, but preserve names as-is (e.g., "Infanrix", "Comirnaty").
