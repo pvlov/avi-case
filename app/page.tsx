@@ -24,7 +24,7 @@ export default function Home() {
         </p>
         <div className="flex flex-wrap justify-center gap-4">
           <Button asChild size="lg">
-            <Link href="/patient">Get Started</Link>
+            <Link href="/patient">Onboarding</Link>
           </Button>
         </div>
       </div>

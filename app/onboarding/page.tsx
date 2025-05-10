@@ -46,7 +46,7 @@ const steps: StepWithComponent[] = [
   },
 ];
 
-export default function Patient() {
+export default function Onboarding() {
   const [currentStepNum, setCurrentStepNum] = useState(1);
   const currentStep = steps.find((step) => step.stepNum === currentStepNum)!;
 
