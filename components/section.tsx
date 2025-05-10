@@ -6,7 +6,7 @@ export interface SectionProps
     VariantProps<typeof sectionVariants> {}
 
 const sectionVariants = tv({
-  base: "container py-4 m-auto",
+  base: "container py-4 m-auto px-4 md:px-0",
   variants: {
     variant: {
       default: "",
@@ -20,16 +20,11 @@ const sectionVariants = tv({
   },
 });
 
-const Section = React.forwardRef<HTMLElement, SectionProps>(
+const Section = React.forwardRef<HTMLInputElement, SectionProps>(
   ({ children, variant, className }, ref) => {
-    return (
-      <section ref={ref} className={sectionVariants({ variant, className })}>
-        {children}
-      </section>
-    );
+    return <section className={sectionVariants({ variant, className })}>{children}</section>;
   },
 );
-
 Section.displayName = "Section";
 
 export { Section };
