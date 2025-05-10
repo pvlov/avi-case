@@ -19,7 +19,7 @@ export function Navbar() {
         <NavigationMenuList>
           <NavigationMenuItem>
             <NavigationMenuLink
-              className={cn(navigationMenuTriggerStyle(), "hover:bg-muted/50 bg-transparent")}
+              className={cn(navigationMenuTriggerStyle(), "bg-transparent hover:bg-transparent")}
               asChild
             >
               <Link href="/">
@@ -33,7 +33,10 @@ export function Navbar() {
           </NavigationMenuItem>
           <NavigationMenuItem>
             <NavigationMenuLink
-              className={cn(navigationMenuTriggerStyle(), "hover:bg-muted/50 bg-transparent")}
+              className={cn(
+                navigationMenuTriggerStyle(),
+                "hover:bg-avi-green/20 bg-transparent transition-all duration-300",
+              )}
               asChild
             >
               <Link href={""}>n/avi</Link>
@@ -41,7 +44,10 @@ export function Navbar() {
           </NavigationMenuItem>
           <NavigationMenuItem>
             <NavigationMenuLink
-              className={cn(navigationMenuTriggerStyle(), "hover:bg-muted/50 bg-transparent")}
+              className={cn(
+                navigationMenuTriggerStyle(),
+                "hover:bg-avi-green/20 bg-transparent transition-all duration-300",
+              )}
               asChild
             >
               <Link href={""}>n/avi</Link>
@@ -49,7 +55,10 @@ export function Navbar() {
           </NavigationMenuItem>
           <NavigationMenuItem>
             <NavigationMenuLink
-              className={cn(navigationMenuTriggerStyle(), "hover:bg-muted/50 bg-transparent")}
+              className={cn(
+                navigationMenuTriggerStyle(),
+                "hover:bg-avi-green/20 bg-transparent transition-all duration-300",
+              )}
               asChild
             >
               <Link href={""}>n/avi</Link>

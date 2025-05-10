@@ -6,7 +6,7 @@ export interface SectionProps
     VariantProps<typeof sectionVariants> {}
 
 const sectionVariants = tv({
-  base: "container py-4 m-auto px-4 md:px-0",
+  base: "container p-4 m-auto md:px-0",
   variants: {
     variant: {
       default: "",
