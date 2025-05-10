@@ -7,32 +7,42 @@ import StepProgressIndicator from "./components/StepProgressIndicator";
 import { Button } from "@/components/ui/button";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { useState } from "react";
-import InsuranceStep from "./components/InsuranceStep";
-import MedicalHistoryStep from "./components/MedicalHistoryStep";
-import VaccinationStep from "./components/VaccinationStep";
-import PrescriptionStep from "./components/PrescriptionStep";
+import InsuranceStep from "./components/DocTypeComponents/InsuranceCard/InsuranceStep";
+import MedicalHistoryStep from "./components/DocTypeComponents/MedicalHistoryStep";
+import VaccinationStep from "./components/DocTypeComponents/Vaccinations/VaccinationStep";
+import PrescriptionStep from "./components/DocTypeComponents/PrescriptionStep";
+import { ReactNode } from "react";
 
-const steps: Step[] = [
+// Extend Step type locally for components
+interface StepWithComponent extends Step {
+  component: ReactNode;
+}
+
+const steps: StepWithComponent[] = [
   {
     stepNum: 1,
     label: "Insurance Information",
     description: "Upload your insurance details and coverage information",
+    component: <InsuranceStep />,
   },
   {
     stepNum: 2,
-    label: "Medical History",
-    description: "Upload your medical history, including any previous illnesses or conditions",
+    label: "Vaccination Records",
+    description: "Upload your vaccination records, including any previous vaccinations or boosters",
+    component: <VaccinationStep />,
   },
   {
     stepNum: 3,
-    label: "Vaccination Records",
-    description: "Upload your vaccination records, including any previous vaccinations or boosters",
+    label: "Medical History",
+    description: "Upload your medical history, including any previous illnesses or conditions",
+    component: <MedicalHistoryStep />,
   },
   {
     stepNum: 4,
     label: "Prescription Records",
     description:
       "Upload your prescription records, including any previous medications or treatments",
+    component: <PrescriptionStep />,
   },
 ];
 
@@ -52,21 +62,6 @@ export default function Patient() {
     }
   };
 
-  const renderStepContent = () => {
-    switch (currentStepNum) {
-      case 1:
-        return <InsuranceStep />;
-      case 2:
-        return <MedicalHistoryStep />;
-      case 3:
-        return <VaccinationStep />;
-      case 4:
-        return <PrescriptionStep />;
-      default:
-        return null;
-    }
-  };
-
   return (
     <Section className="flex min-h-[calc(100vh-3.5rem)] flex-col gap-4">
       <div className="flex flex-col gap-2">
@@ -78,7 +73,7 @@ export default function Patient() {
           <CardTitle>{currentStep.label}</CardTitle>
           <CardDescription>{currentStep.description}</CardDescription>
         </CardHeader>
-        <CardContent className="flex-1">{renderStepContent()}</CardContent>
+        <CardContent className="flex-1">{currentStep.component}</CardContent>
       </Card>
       <div className="flex justify-between">
         <Button

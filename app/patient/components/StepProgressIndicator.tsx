@@ -1,10 +1,16 @@
 import { Progress } from "@/components/ui/progress";
 import { cn } from "@/lib/utils";
 import { Step } from "@/types/patient";
+import { ReactNode } from "react";
+
+// Extend Step type locally to match the one in patient/page.tsx
+interface StepWithComponent extends Step {
+  component: ReactNode;
+}
 
 interface StepProgressIndicatorProps {
-  steps: Step[];
-  currentStep: Step;
+  steps: StepWithComponent[];
+  currentStep: StepWithComponent;
 }
 
 export default function StepProgressIndicator({ steps, currentStep }: StepProgressIndicatorProps) {
