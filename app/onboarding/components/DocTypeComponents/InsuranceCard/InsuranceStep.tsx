@@ -66,6 +66,10 @@ export default function InsuranceStep() {
 
   const handleFilesChange = (newFiles: File[]) => {
     setFiles(newFiles);
+    // If files were removed, you might want to clear success state
+    if (newFiles.length === 0) {
+      setSuccess(false);
+    }
   };
 
   const handleFileUploadSubmit = async () => {

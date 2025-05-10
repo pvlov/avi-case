@@ -77,6 +77,10 @@ export default function VaccinationStep() {
 
   const handleFilesChange = (newFiles: File[]) => {
     setFiles(newFiles);
+
+    if (newFiles.length === 0) {
+      setSuccess(false);
+    }
   };
 
   const handleFileUploadSubmit = async () => {
