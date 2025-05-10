@@ -1,11 +1,11 @@
-'use client';
-import { useState } from 'react';
-import { processAndSaveMedicalDocument } from '@/services/medicalDocumentService';
-import type { MedicalDocument } from '@/types/medical';
+"use client";
+import { useState } from "react";
+import { processAndSaveMedicalDocument } from "@/services/medicalDocumentService";
+import type { MedicalDocument } from "@/types/medical";
 
 export default function MedicalDocumentUpload() {
   const [document, setDocument] = useState<MedicalDocument | null>(null);
-  const [error, setError] = useState<string>('');
+  const [error, setError] = useState<string>("");
   const [loading, setLoading] = useState(false);
 
   async function handleFileUpload(event: React.ChangeEvent<HTMLInputElement>) {
@@ -13,13 +13,13 @@ export default function MedicalDocumentUpload() {
     if (!file) return;
 
     setLoading(true);
-    setError('');
+    setError("");
 
     try {
       const result = await processAndSaveMedicalDocument(file);
       setDocument(result);
     } catch (error) {
-      setError(error instanceof Error ? error.message : 'An error occurred');
+      setError(error instanceof Error ? error.message : "An error occurred");
     } finally {
       setLoading(false);
     }
@@ -36,9 +36,9 @@ export default function MedicalDocumentUpload() {
       />
 
       {loading && <p>Processing document...</p>}
-      
+
       {error && <p className="text-red-500">{error}</p>}
-      
+
       {document && (
         <div className="mt-4">
           <h2>Processed Document</h2>
@@ -46,7 +46,7 @@ export default function MedicalDocumentUpload() {
           <p>Date: {document.dateIssued.toLocaleDateString()}</p>
           <p>Doctor: {document.doctorName}</p>
           <p>Diagnosis: {document.diagnosis}</p>
-          
+
           <h3 className="mt-2">Medications:</h3>
           <ul>
             {document.medications.map((med, index) => (
@@ -59,4 +59,4 @@ export default function MedicalDocumentUpload() {
       )}
     </div>
   );
-} 
+}

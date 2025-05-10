@@ -68,7 +68,7 @@ export default function Patient() {
   };
 
   return (
-    <Section className="flex flex-col gap-4 h-[calc(100vh-3.5rem)] py-4">
+    <Section className="flex h-[calc(100vh-3.5rem)] flex-col gap-4 py-4">
       <div className="flex flex-col gap-4">
         <div>
           <h1 className="text-4xl font-bold">Patient</h1>
@@ -78,14 +78,12 @@ export default function Patient() {
         </div>
         <StepProgressIndicator steps={steps} currentStep={currentStep} />
       </div>
-      <Card className="flex-1 flex flex-col">
+      <Card className="flex flex-1 flex-col">
         <CardHeader>
           <CardTitle>{currentStep.label}</CardTitle>
           <CardDescription>{currentStep.description}</CardDescription>
         </CardHeader>
-        <CardContent className="flex-1">
-          {renderStepContent()}
-        </CardContent>
+        <CardContent className="flex-1">{renderStepContent()}</CardContent>
       </Card>
       <div className="flex justify-between pt-4">
         <Button

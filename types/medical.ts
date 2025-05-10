@@ -16,4 +16,4 @@ export interface Medication {
   frequency: string;
   duration: string;
   documentId?: string;
-} 
+}

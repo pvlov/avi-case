@@ -117,7 +117,7 @@ export default function InsuranceStep() {
           ) : (
             <div className="flex w-full flex-col items-center gap-2">
               <div
-                className={`relative w-full ${isMobile && isPortrait ? "aspect-[3/4]" : "aspect-video"} overflow-hidden rounded-lg bg-black max-h-[50vh]`}
+                className={`relative w-full ${isMobile && isPortrait ? "aspect-[3/4]" : "aspect-video"} max-h-[50vh] overflow-hidden rounded-lg bg-black`}
               >
                 <Webcam
                   ref={webcamRef}
@@ -130,7 +130,7 @@ export default function InsuranceStep() {
                 />
               </div>
               {cameraError && <p className="text-destructive text-sm">{cameraError}</p>}
-              <div className="flex gap-2 mt-2">
+              <div className="mt-2 flex gap-2">
                 <Button variant="outline" onClick={stopCamera}>
                   Cancel
                 </Button>
