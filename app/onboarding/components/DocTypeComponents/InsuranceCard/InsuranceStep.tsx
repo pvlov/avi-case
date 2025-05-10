@@ -154,7 +154,7 @@ export default function InsuranceStep() {
         </div>
       )}
       
-      <TabsContent value="upload" className="flex flex-col">
+      <TabsContent value="upload" className="flex flex-col gap-4">
         {success || insuranceData ? (
           <div className="flex items-center justify-center">
             <CircleCheck className="mt-12 mb-12 size-16" />
@@ -163,13 +163,14 @@ export default function InsuranceStep() {
           submitElements
         )}
         {!success && !insuranceData && (
-          <Button 
-            className="mt-4 w-full" 
-            onClick={handleFileUploadSubmit}
-            disabled={isLoading || isSubmitting || files.length === 0}
-          >
-            Submit
-          </Button>
+          <div className="flex justify-end">
+            <Button 
+              onClick={handleFileUploadSubmit}
+              disabled={isLoading || isSubmitting || files.length === 0}
+            >
+              Submit
+            </Button>
+          </div>
         )}
       </TabsContent>
       <TabsContent value="manual" className="p-4">
