@@ -18,15 +18,19 @@ export interface Medication {
   documentId?: string;
 }
 
-export interface InsuranceCardData {
-  insurerName: string,        
-  insurerId: string,          
-  memberId: string,           
-  givenName: string,          
-  familyName: string,         
-  dateOfBirth: Date 
-  validFrom: Date,       
-  validTo: Date,         
-  cardSerialNumber: string,   
-  cardNumber: string,         
+export interface Vaccination {
+  vaccine: string;      
+  date: Date;          
+  trade_name?: string;
+  batch_number?: string;
+  doctor?: string;   
+  location?: string; 
+  notes?: string; 
+};
+
+export interface SpecialTest {
+  type: string;
+  date: Date;
+  reaction?: string;
+  issuer?: string;
 }
