@@ -17,3 +17,16 @@ export interface Medication {
   duration: string;
   documentId?: string;
 }
+
+export interface InsuranceCardData {
+  insurerName: string,        
+  insurerId: string,          
+  memberId: string,           
+  givenName: string,          
+  familyName: string,         
+  dateOfBirth: Date 
+  validFrom: Date,       
+  validTo: Date,         
+  cardSerialNumber: string,   
+  cardNumber: string,         
+}
