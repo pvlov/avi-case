@@ -2,6 +2,7 @@ export interface MedicalDocument {
   generatedTitle?: string;
   dateIssued: string | null;
   doctorName: string | null;
+  generatedTitle: string;
   patient: {
     name: string | null;
     birth_date: string | null;
@@ -71,17 +72,15 @@ export interface Medication {
   documentId?: string;
 }
 
-export interface InsuranceCardData {
-  insurerName: string;
-  insurerId: string;
-  memberId: string;
+export interface InsuranceCard {
   givenName: string;
   familyName: string;
   dateOfBirth: Date;
-  validFrom: Date;
-  validTo: Date;
-  cardSerialNumber: string;
+  personalNumber: string;
+  insuranceNumber: string;
+  insuranceName: string;
   cardNumber: string;
+  validUntil: Date;
 }
 
 export enum DocType {
@@ -89,20 +88,23 @@ export enum DocType {
   INSURANCECARD = "insurancecard",
   DOCUMENT = "document",
   VACCINEPASS = "vaccinepass",
+  REASONFORVISIT = "reasonforvisit",
 }
 
-export interface Vaccination {
-  vaccine: string;
+// Individual vaccination entry interface
+export interface VaccinationEntry {
+  vaccine: string; // e.g. MMR, Tetanus, COVID-19
   date: Date;
-  trade_name?: string;
-  batch_number?: string;
-  doctor?: string;
-  location?: string;
-  notes?: string;
+  trade_name?: string; // e.g. Infanrix, Comirnaty
+  batch_number?: string; // from the sticker (Ch.-B. or similar)
+  doctor?: string; // doctor or practice name
+  location?: string; // practice, city, stamp
+  notes?: string; // optional handwritten comments, remarks, booster info
 }
 
+// Special test interface for TB, Yellow Fever, etc.
 export interface SpecialTest {
-  type: string;
+  type: string; // "Tuberculosis", "Yellow Fever", "Hepatitis B", etc.
   date: Date;
   reaction?: string;
   issuer?: string;

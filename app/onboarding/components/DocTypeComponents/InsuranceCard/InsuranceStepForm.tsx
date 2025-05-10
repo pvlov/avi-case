@@ -3,7 +3,6 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
-import { Button } from "@/components/ui/button";
 import {
   Form,
   FormControl,
@@ -13,7 +12,8 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { InsuranceCardData } from "@/types/medical";
+import { InsuranceCard } from "@/types/medical";
+import * as React from "react";
 
 // Create a schema for form validation
 const formSchema = z.object({
@@ -35,13 +35,9 @@ const formSchema = z.object({
   dateOfBirth: z.string().min(1, {
     message: "Date of birth is required.",
   }),
-  validFrom: z.string().min(1, {
-    message: "Valid from date is required.",
-  }),
-  validTo: z.string().min(1, {
+  validUntil: z.string().min(1, {
     message: "Valid to date is required.",
   }),
-  cardSerialNumber: z.string(),
   cardNumber: z.string().min(1, {
     message: "Card number is required.",
   }),
@@ -50,44 +46,63 @@ const formSchema = z.object({
 type FormValues = z.infer<typeof formSchema>;
 
 interface InsuranceStepFormProps {
-  onSubmit?: (data: InsuranceCardData) => void;
+  onSubmit?: (data: InsuranceCard) => void;
+  defaultValues?: InsuranceCard;
+  isEdit?: boolean;
 }
 
-export function InsuranceStepForm({ onSubmit }: InsuranceStepFormProps) {
+export function InsuranceStepForm({
+  onSubmit,
+  defaultValues,
+  isEdit = false,
+}: InsuranceStepFormProps) {
+  // Format dates properly for the form
+  const formattedDefaultValues = defaultValues
+    ? {
+        insurerName: defaultValues.insuranceName,
+        insurerId: defaultValues.insuranceNumber,
+        memberId: defaultValues.personalNumber,
+        givenName: defaultValues.givenName,
+        familyName: defaultValues.familyName,
+        dateOfBirth: defaultValues.dateOfBirth
+          ? new Date(defaultValues.dateOfBirth).toISOString().split("T")[0]
+          : "",
+        validUntil: defaultValues.validUntil
+          ? new Date(defaultValues.validUntil).toISOString().split("T")[0]
+          : "",
+        cardNumber: defaultValues.cardNumber,
+      }
+    : {
+        insurerName: "",
+        insurerId: "",
+        memberId: "",
+        givenName: "",
+        familyName: "",
+        dateOfBirth: "",
+        validUntil: "",
+        cardNumber: "",
+      };
+
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
-    defaultValues: {
-      insurerName: "",
-      insurerId: "",
-      memberId: "",
-      givenName: "",
-      familyName: "",
-      dateOfBirth: "",
-      validFrom: "",
-      validTo: "",
-      cardSerialNumber: "",
-      cardNumber: "",
-    },
+    defaultValues: formattedDefaultValues,
   });
 
-  function handleSubmit(values: FormValues) {
-    const data: InsuranceCardData = {
-      ...values,
-      dateOfBirth: new Date(values.dateOfBirth),
-      validFrom: new Date(values.validFrom),
-      validTo: new Date(values.validTo),
+  const handleFieldChange = (fieldName: keyof FormValues, value: string) => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const updatedData: any = {
+      ...defaultValues,
+      [fieldName]: value,
     };
 
     if (onSubmit) {
-      onSubmit(data);
+      onSubmit(updatedData);
     }
-
-    console.log("Form submitted:", data);
-  }
+  };
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
+      <form className="space-y-6">
         <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
           {/* Insurer Information */}
           <div className="space-y-4">
@@ -100,7 +115,14 @@ export function InsuranceStepForm({ onSubmit }: InsuranceStepFormProps) {
                 <FormItem>
                   <FormLabel>Insurer Name</FormLabel>
                   <FormControl>
-                    <Input placeholder="e.g. Blue Cross" {...field} />
+                    <Input
+                      placeholder="e.g. Blue Cross"
+                      {...field}
+                      onChange={(e) => {
+                        field.onChange(e);
+                        handleFieldChange("insurerName", e.target.value);
+                      }}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -114,7 +136,14 @@ export function InsuranceStepForm({ onSubmit }: InsuranceStepFormProps) {
                 <FormItem>
                   <FormLabel>Insurer ID</FormLabel>
                   <FormControl>
-                    <Input placeholder="e.g. BC1234" {...field} />
+                    <Input
+                      placeholder="e.g. BC1234"
+                      {...field}
+                      onChange={(e) => {
+                        field.onChange(e);
+                        handleFieldChange("insurerId", e.target.value);
+                      }}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -133,7 +162,14 @@ export function InsuranceStepForm({ onSubmit }: InsuranceStepFormProps) {
                 <FormItem>
                   <FormLabel>Member ID</FormLabel>
                   <FormControl>
-                    <Input placeholder="e.g. 123456789" {...field} />
+                    <Input
+                      placeholder="e.g. 123456789"
+                      {...field}
+                      onChange={(e) => {
+                        field.onChange(e);
+                        handleFieldChange("memberId", e.target.value);
+                      }}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -147,21 +183,14 @@ export function InsuranceStepForm({ onSubmit }: InsuranceStepFormProps) {
                 <FormItem>
                   <FormLabel>Card Number</FormLabel>
                   <FormControl>
-                    <Input placeholder="e.g. 987654321" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name="cardSerialNumber"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Card Serial Number</FormLabel>
-                  <FormControl>
-                    <Input placeholder="e.g. SN12345" {...field} />
+                    <Input
+                      placeholder="e.g. 987654321"
+                      {...field}
+                      onChange={(e) => {
+                        field.onChange(e);
+                        handleFieldChange("cardNumber", e.target.value);
+                      }}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -182,7 +211,14 @@ export function InsuranceStepForm({ onSubmit }: InsuranceStepFormProps) {
                 <FormItem>
                   <FormLabel>Given Name</FormLabel>
                   <FormControl>
-                    <Input placeholder="e.g. John" {...field} />
+                    <Input
+                      placeholder="e.g. John"
+                      {...field}
+                      onChange={(e) => {
+                        field.onChange(e);
+                        handleFieldChange("givenName", e.target.value);
+                      }}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -196,7 +232,14 @@ export function InsuranceStepForm({ onSubmit }: InsuranceStepFormProps) {
                 <FormItem>
                   <FormLabel>Family Name</FormLabel>
                   <FormControl>
-                    <Input placeholder="e.g. Doe" {...field} />
+                    <Input
+                      placeholder="e.g. Doe"
+                      {...field}
+                      onChange={(e) => {
+                        field.onChange(e);
+                        handleFieldChange("familyName", e.target.value);
+                      }}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -210,7 +253,15 @@ export function InsuranceStepForm({ onSubmit }: InsuranceStepFormProps) {
                 <FormItem>
                   <FormLabel>Date of Birth</FormLabel>
                   <FormControl>
-                    <Input type="date" placeholder="YYYY-MM-DD" {...field} />
+                    <Input
+                      type="date"
+                      placeholder="YYYY-MM-DD"
+                      {...field}
+                      onChange={(e) => {
+                        field.onChange(e);
+                        handleFieldChange("dateOfBirth", e.target.value);
+                      }}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -224,36 +275,26 @@ export function InsuranceStepForm({ onSubmit }: InsuranceStepFormProps) {
 
             <FormField
               control={form.control}
-              name="validFrom"
+              name="validUntil"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Valid From</FormLabel>
+                  <FormLabel>Valid Until</FormLabel>
                   <FormControl>
-                    <Input type="date" placeholder="YYYY-MM-DD" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name="validTo"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Valid To</FormLabel>
-                  <FormControl>
-                    <Input type="date" placeholder="YYYY-MM-DD" {...field} />
+                    <Input
+                      type="date"
+                      placeholder="YYYY-MM-DD"
+                      {...field}
+                      onChange={(e) => {
+                        field.onChange(e);
+                        handleFieldChange("validUntil", e.target.value);
+                      }}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
             />
           </div>
-        </div>
-
-        <div className="flex justify-end">
-          <Button type="submit">Save Insurance Information</Button>
         </div>
       </form>
     </Form>

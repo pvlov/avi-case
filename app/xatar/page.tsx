@@ -4,6 +4,7 @@ import * as React from "react";
 import { useState } from "react";
 import { parseDocuments } from "@/actions/gemini";
 import { isSuccess } from "@/types/util";
+import { DocType, InsuranceCard } from "../../types/medical";
 
 export default function DocumentParser() {
   const [files, setFiles] = useState<File[]>([]);
@@ -39,16 +40,16 @@ export default function DocumentParser() {
     try {
       const formData = new FormData();
       files.forEach((file) => formData.append("image", file));
-      formData.append("documentType", "document");
+      formData.append("documentType", DocType.INSURANCECARD);
 
-      const result = await parseDocuments(formData);
+      const result = await parseDocuments<InsuranceCard>(formData);
       clearInterval(interval);
 
       if (isSuccess(result)) {
-        setExtractedData(result.value as string);
+        setExtractedData(JSON.stringify(result.value, null, 2));
         setProgress("Extraction complete!");
       } else {
-        setProgress("");
+        setProgress(result.error);
       }
     } catch (err) {
       clearInterval(interval);

@@ -1,9 +1,10 @@
-import { InsuranceCardData } from './medical';
+import { InsuranceCardData } from "@/types/medical";
+
 
 export interface TimelineItem {
   id: string;
   date: Date;
-  type: 'document' | 'prescription' | 'vaccination' | 'labresult';
+  type: "document" | "prescription" | "vaccination" | "labresult";
   title: string;
   description: string;
   doctorName: string;
@@ -34,4 +35,4 @@ export interface CategoryItem {
 
 export interface PersonalInfoItem {
   insuranceData: InsuranceCardData;
-} 
+}

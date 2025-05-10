@@ -1,18 +1,18 @@
-'use client';
+"use client";
 
-import { useState } from 'react';
-import { TimelineView } from './components/TimelineView';
-import { CategoryView } from './components/CategoryView';
-import { fetchMedicalData } from './datatransfer';
-import { useEffect } from 'react';
-import { TimelineItem, CategoryItem, PersonalInfoItem } from '@/types/dashboard';
+import { useState } from "react";
+import { TimelineView } from "./components/TimelineView";
+import { CategoryView } from "./components/CategoryView";
+import { fetchMedicalData } from "./datatransfer";
+import { useEffect } from "react";
+import { TimelineItem, CategoryItem, PersonalInfoItem } from "@/types/dashboard";
 
 export default function Dashboard() {
   const [timelineItems, setTimelineItems] = useState<TimelineItem[]>([]);
   const [categories, setCategories] = useState({
     medications: [] as CategoryItem[],
     vaccinations: [] as CategoryItem[],
-    procedures: [] as CategoryItem[]
+    procedures: [] as CategoryItem[],
   });
   const [personalInfo, setPersonalInfo] = useState<PersonalInfoItem | null>(null);
 
@@ -23,7 +23,7 @@ export default function Dashboard() {
       setCategories({
         medications: data.medications,
         vaccinations: data.vaccinations,
-        procedures: data.procedures
+        procedures: data.procedures,
       });
       setPersonalInfo(data.personalInfo);
     };
@@ -31,23 +31,23 @@ export default function Dashboard() {
   }, []);
 
   const handleHover = (documentId: string | null) => {
-    setTimelineItems(items =>
-      items.map(item => ({
+    setTimelineItems((items) =>
+      items.map((item) => ({
         ...item,
-        isHighlighted: documentId ? item.documentId === documentId : false
-      }))
+        isHighlighted: documentId ? item.documentId === documentId : false,
+      })),
     );
   };
 
   if (!personalInfo) return null;
 
   return (
-    <div className="flex h-screen bg-background">
+    <div className="bg-background flex h-screen">
       <div className="w-1/2 overflow-y-auto">
         <TimelineView items={timelineItems} />
       </div>
-      <div className="w-1/2 overflow-y-auto border-l border-border">
-        <CategoryView 
+      <div className="border-border w-1/2 overflow-y-auto border-l">
+        <CategoryView
           personalInfo={personalInfo}
           categories={categories}
           onHoverCategory={handleHover}
