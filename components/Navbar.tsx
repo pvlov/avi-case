@@ -39,7 +39,7 @@ export function Navbar() {
               )}
               asChild
             >
-              <Link href="/patient">Patient</Link>
+              <Link href="/onboarding">Onboarding</Link>
             </NavigationMenuLink>
           </NavigationMenuItem>
           <NavigationMenuItem>

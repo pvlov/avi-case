@@ -53,7 +53,7 @@ interface InsuranceStepFormProps {
   onSubmit?: (data: InsuranceCardData) => void;
 }
 
-export function VaccinationStepForm({ onSubmit }: InsuranceStepFormProps) {
+export function InsuranceStepForm({ onSubmit }: InsuranceStepFormProps) {
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -252,9 +252,9 @@ export function VaccinationStepForm({ onSubmit }: InsuranceStepFormProps) {
           </div>
         </div>
 
-        <Button type="submit" className="w-full">
-          Submit
-        </Button>
+        <div className="flex justify-end">
+          <Button type="submit">Save Insurance Information</Button>
+        </div>
       </form>
     </Form>
   );
