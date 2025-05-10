@@ -11,9 +11,9 @@ import { parseDocuments } from "@/actions/gemini";
 import { Spinner } from "@/components/ui/spinner";
 import { useFormWithStore } from "@/lib/useFormWithStore";
 import { useMedicalStore } from "@/lib/store";
-import { Card, CardContent } from "@/components/ui/card";
 import { VaccinationTable } from "./VaccinationTable";
 import { VaccinationEditDialog } from "./VaccinationEditDialog";
+import { ScrollArea } from "@/components/ui/scroll-area";
 
 // Simple stable selectors
 const selectRecords = (state: any) => state.records;
@@ -198,16 +198,14 @@ export default function VaccinationStep() {
             </Button>
           )}
         </TabsContent>
-        <TabsContent value="manual" className="p-4">
-          <Card>
-            <CardContent className="pt-6">
-              <VaccinationTable
-                data={vaccinationData || getEmptyVaccinationData()}
-                onEditVaccination={handleEditVaccination}
-                onAddVaccination={handleAddVaccination}
-              />
-            </CardContent>
-          </Card>
+        <TabsContent value="manual">
+          <ScrollArea className="h-[400px] w-full border rounded-md p-4">
+            <VaccinationTable 
+              data={vaccinationData || getEmptyVaccinationData()} 
+              onEditVaccination={handleEditVaccination}
+              onAddVaccination={handleAddVaccination}
+            />
+          </ScrollArea>
         </TabsContent>
       </Tabs>
 
