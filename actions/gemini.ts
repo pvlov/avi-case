@@ -276,7 +276,7 @@ export const parseDocuments = async <T>(formData: FormData): Promise<Result<T, s
   }
 
   const content: ContentListUnion = [PROMPTS[documentType] || PROMPTS[DocType.RAW], text.value!];
-  
+
   // Send it all off to Gemini
   const response = await ai.models.generateContent({
     model: MODEL,
@@ -288,7 +288,36 @@ export const parseDocuments = async <T>(formData: FormData): Promise<Result<T, s
   }
 
   try {
-    return ok(JSON.parse(stripFirstAndLastLine(response.text)) as T);
+    let parsedData = JSON.parse(stripFirstAndLastLine(response.text)) as any;
+
+    // Transform date strings to Date objects based on document type
+    if (documentType === DocType.VACCINEPASS) {
+      if (parsedData.vaccinations && Array.isArray(parsedData.vaccinations)) {
+        // Convert date strings to Date objects in vaccinations array
+        parsedData.vaccinations = parsedData.vaccinations.map((vaccination: any) => ({
+          ...vaccination,
+          date: vaccination.date ? new Date(vaccination.date) : null,
+        }));
+      }
+
+      if (parsedData.special_tests && Array.isArray(parsedData.special_tests)) {
+        // Convert date strings to Date objects in special_tests array
+        parsedData.special_tests = parsedData.special_tests.map((test: any) => ({
+          ...test,
+          date: test.date ? new Date(test.date) : null,
+        }));
+      }
+    } else if (documentType === DocType.INSURANCECARD) {
+      // Handle insurance card dates
+      if (parsedData.dateOfBirth) {
+        parsedData.dateOfBirth = new Date(parsedData.dateOfBirth);
+      }
+      if (parsedData.validUntil) {
+        parsedData.validUntil = new Date(parsedData.validUntil);
+      }
+    }
+
+    return ok(parsedData as T);
   } catch (e) {
     console.log(response.text);
     return err("Invalid JSON response from Gemini: " + e);

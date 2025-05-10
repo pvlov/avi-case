@@ -3,7 +3,6 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
-import { Button } from "@/components/ui/button";
 import {
   Form,
   FormControl,
@@ -52,26 +51,25 @@ interface InsuranceStepFormProps {
   isEdit?: boolean;
 }
 
-export function InsuranceStepForm({ 
-  onSubmit, 
+export function InsuranceStepForm({
+  onSubmit,
   defaultValues,
-  isEdit = false 
+  isEdit = false,
 }: InsuranceStepFormProps) {
   // Format dates properly for the form
-  const formattedDefaultValues = defaultValues 
+  const formattedDefaultValues = defaultValues
     ? {
         insurerName: defaultValues.insuranceName,
         insurerId: defaultValues.insuranceNumber,
         memberId: defaultValues.personalNumber,
         givenName: defaultValues.givenName,
         familyName: defaultValues.familyName,
-        // Format dates as YYYY-MM-DD for input type="date"
-        dateOfBirth: defaultValues.dateOfBirth instanceof Date 
-          ? defaultValues.dateOfBirth.toISOString().split('T')[0] 
-          : new Date(defaultValues.dateOfBirth).toISOString().split('T')[0],
-        validUntil: defaultValues.validUntil instanceof Date 
-          ? defaultValues.validUntil.toISOString().split('T')[0] 
-          : new Date(defaultValues.validUntil).toISOString().split('T')[0],
+        dateOfBirth: defaultValues.dateOfBirth
+          ? new Date(defaultValues.dateOfBirth).toISOString().split("T")[0]
+          : "",
+        validUntil: defaultValues.validUntil
+          ? new Date(defaultValues.validUntil).toISOString().split("T")[0]
+          : "",
         cardNumber: defaultValues.cardNumber,
       }
     : {
@@ -90,28 +88,21 @@ export function InsuranceStepForm({
     defaultValues: formattedDefaultValues,
   });
 
-  function handleSubmit(values: FormValues) {
-    const data: InsuranceCard = {
-      givenName: values.givenName,
-      familyName: values.familyName,
-      dateOfBirth: new Date(values.dateOfBirth),
-      personalNumber: values.memberId,
-      insuranceNumber: values.insurerId,
-      insuranceName: values.insurerName,
-      cardNumber: values.cardNumber,
-      validUntil: new Date(values.validUntil),
+  const handleFieldChange = (fieldName: keyof FormValues, value: string) => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const updatedData: any = {
+      ...defaultValues,
+      [fieldName]: value,
     };
 
     if (onSubmit) {
-      onSubmit(data);
+      onSubmit(updatedData);
     }
-
-    console.log("Form submitted:", data);
-  }
+  };
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
+      <form className="space-y-6">
         <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
           {/* Insurer Information */}
           <div className="space-y-4">
@@ -124,7 +115,14 @@ export function InsuranceStepForm({
                 <FormItem>
                   <FormLabel>Insurer Name</FormLabel>
                   <FormControl>
-                    <Input placeholder="e.g. Blue Cross" {...field} />
+                    <Input
+                      placeholder="e.g. Blue Cross"
+                      {...field}
+                      onChange={(e) => {
+                        field.onChange(e);
+                        handleFieldChange("insurerName", e.target.value);
+                      }}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -138,7 +136,14 @@ export function InsuranceStepForm({
                 <FormItem>
                   <FormLabel>Insurer ID</FormLabel>
                   <FormControl>
-                    <Input placeholder="e.g. BC1234" {...field} />
+                    <Input
+                      placeholder="e.g. BC1234"
+                      {...field}
+                      onChange={(e) => {
+                        field.onChange(e);
+                        handleFieldChange("insurerId", e.target.value);
+                      }}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -157,7 +162,14 @@ export function InsuranceStepForm({
                 <FormItem>
                   <FormLabel>Member ID</FormLabel>
                   <FormControl>
-                    <Input placeholder="e.g. 123456789" {...field} />
+                    <Input
+                      placeholder="e.g. 123456789"
+                      {...field}
+                      onChange={(e) => {
+                        field.onChange(e);
+                        handleFieldChange("memberId", e.target.value);
+                      }}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -171,7 +183,14 @@ export function InsuranceStepForm({
                 <FormItem>
                   <FormLabel>Card Number</FormLabel>
                   <FormControl>
-                    <Input placeholder="e.g. 987654321" {...field} />
+                    <Input
+                      placeholder="e.g. 987654321"
+                      {...field}
+                      onChange={(e) => {
+                        field.onChange(e);
+                        handleFieldChange("cardNumber", e.target.value);
+                      }}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -192,7 +211,14 @@ export function InsuranceStepForm({
                 <FormItem>
                   <FormLabel>Given Name</FormLabel>
                   <FormControl>
-                    <Input placeholder="e.g. John" {...field} />
+                    <Input
+                      placeholder="e.g. John"
+                      {...field}
+                      onChange={(e) => {
+                        field.onChange(e);
+                        handleFieldChange("givenName", e.target.value);
+                      }}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -206,7 +232,14 @@ export function InsuranceStepForm({
                 <FormItem>
                   <FormLabel>Family Name</FormLabel>
                   <FormControl>
-                    <Input placeholder="e.g. Doe" {...field} />
+                    <Input
+                      placeholder="e.g. Doe"
+                      {...field}
+                      onChange={(e) => {
+                        field.onChange(e);
+                        handleFieldChange("familyName", e.target.value);
+                      }}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -220,7 +253,15 @@ export function InsuranceStepForm({
                 <FormItem>
                   <FormLabel>Date of Birth</FormLabel>
                   <FormControl>
-                    <Input type="date" placeholder="YYYY-MM-DD" {...field} />
+                    <Input
+                      type="date"
+                      placeholder="YYYY-MM-DD"
+                      {...field}
+                      onChange={(e) => {
+                        field.onChange(e);
+                        handleFieldChange("dateOfBirth", e.target.value);
+                      }}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -239,19 +280,21 @@ export function InsuranceStepForm({
                 <FormItem>
                   <FormLabel>Valid Until</FormLabel>
                   <FormControl>
-                    <Input type="date" placeholder="YYYY-MM-DD" {...field} />
+                    <Input
+                      type="date"
+                      placeholder="YYYY-MM-DD"
+                      {...field}
+                      onChange={(e) => {
+                        field.onChange(e);
+                        handleFieldChange("validUntil", e.target.value);
+                      }}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
             />
           </div>
-        </div>
-
-        <div className="flex justify-end">
-          <Button type="submit">
-            {isEdit ? 'Update Insurance Information' : 'Save Insurance Information'}
-          </Button>
         </div>
       </form>
     </Form>

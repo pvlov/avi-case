@@ -10,7 +10,7 @@ export interface MedicalDocument {
     weight_kg: number | null;
     bmi: number | null;
   };
-  vitals: Vitals,
+  vitals: Vitals;
   anamnesis: string | null;
   statusAtAdmission: string | null;
   diagnosis: string[];
@@ -75,18 +75,18 @@ export enum DocType {
 
 // Individual vaccination entry interface
 export interface VaccinationEntry {
-  vaccine: string;         // e.g. MMR, Tetanus, COVID-19
+  vaccine: string; // e.g. MMR, Tetanus, COVID-19
   date: Date;
-  trade_name?: string;     // e.g. Infanrix, Comirnaty
-  batch_number?: string;   // from the sticker (Ch.-B. or similar)
-  doctor?: string;         // doctor or practice name
-  location?: string;       // practice, city, stamp
-  notes?: string;          // optional handwritten comments, remarks, booster info
+  trade_name?: string; // e.g. Infanrix, Comirnaty
+  batch_number?: string; // from the sticker (Ch.-B. or similar)
+  doctor?: string; // doctor or practice name
+  location?: string; // practice, city, stamp
+  notes?: string; // optional handwritten comments, remarks, booster info
 }
 
 // Special test interface for TB, Yellow Fever, etc.
 export interface SpecialTest {
-  type: string;            // "Tuberculosis", "Yellow Fever", "Hepatitis B", etc.
+  type: string; // "Tuberculosis", "Yellow Fever", "Hepatitis B", etc.
   date: Date;
   reaction?: string;
   issuer?: string;

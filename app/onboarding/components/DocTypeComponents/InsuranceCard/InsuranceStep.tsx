@@ -22,30 +22,30 @@ export default function InsuranceStep() {
   const [success, setSuccess] = useState<boolean>(false);
   const [activeTab, setActiveTab] = useState("upload");
   const tabsRef = useRef<HTMLDivElement>(null);
-  
+
   // Get records with a stable selector
   const allRecords = useMedicalStore(selectRecords);
-  
+
   // Memoize the filtered records
-  const insuranceRecords = useMemo(() => 
-    allRecords.filter((record: any) => record.docType === DocType.INSURANCECARD),
-    [allRecords]
+  const insuranceRecords = useMemo(
+    () => allRecords.filter((record: any) => record.docType === DocType.INSURANCECARD),
+    [allRecords],
   );
-  
-  const existingRecord = useMemo(() => 
-    insuranceRecords.length > 0 ? insuranceRecords[0] : null,
-    [insuranceRecords]
+
+  const existingRecord = useMemo(
+    () => (insuranceRecords.length > 0 ? insuranceRecords[0] : null),
+    [insuranceRecords],
   );
-  
+
   const updateRecord = useMedicalStore(selectUpdateRecord);
-  
+
   // Force tab to "manual" when records exist
   useEffect(() => {
     if (existingRecord) {
       setActiveTab("manual");
     }
-  }, [existingRecord]); 
-  
+  }, [existingRecord]);
+
   // If we have existing data, load it
   useEffect(() => {
     if (existingRecord) {
@@ -60,8 +60,8 @@ export default function InsuranceStep() {
       title: "Insurance Card",
       onSuccess: () => {
         setSuccess(true);
-      }
-    }
+      },
+    },
   );
 
   const handleFilesChange = (newFiles: File[]) => {
@@ -79,23 +79,23 @@ export default function InsuranceStep() {
     files.forEach((file) => formData.append("image", file));
     formData.append("documentType", DocType.INSURANCECARD);
     const insuranceCardData = await parseDocuments<InsuranceCard>(formData);
-    
+
     if (insuranceCardData.value) {
       const newData = insuranceCardData.value;
       setInsuranceData(newData);
-      
+
       // Update existing record or create new one
       if (existingRecord) {
         updateRecord(existingRecord.id, { data: newData });
       } else {
         await handleSubmit(newData);
       }
-      
+
       setSuccess(true);
-      
+
       // Switch to manual tab after successful processing
       setActiveTab("manual");
-      
+
       // Use setTimeout to ensure the tab content is rendered before scrolling
       setTimeout(() => {
         if (tabsRef.current) {
@@ -111,7 +111,7 @@ export default function InsuranceStep() {
 
   const handleFormSubmit = async (data: InsuranceCard) => {
     setInsuranceData(data);
-    
+
     // Update existing record or create new one
     if (existingRecord) {
       updateRecord(existingRecord.id, { data });
@@ -119,26 +119,14 @@ export default function InsuranceStep() {
     } else {
       await handleSubmit(data);
     }
-    
+
     console.log("Insurance data submitted and saved to store:", data);
   };
 
-  const submitElements = isLoading ? (
-    <div className="flex items-center justify-center">
-      <Spinner className="mt-12 mb-12 size-16" />
-    </div>
-  ) : (
-    <FilePhotoUpload
-      onFilesChange={handleFilesChange}
-      title=""
-      subtitle="PDF, JPG, or PNG (max 10 files)"
-    />
-  );
-
   return (
-    <Tabs 
+    <Tabs
       ref={tabsRef}
-      defaultValue={existingRecord ? "manual" : "upload"} 
+      defaultValue={existingRecord ? "manual" : "upload"}
       className="flex h-full flex-col"
       onValueChange={setActiveTab}
       value={activeTab}
@@ -147,35 +135,35 @@ export default function InsuranceStep() {
         <TabsTrigger value="upload">Upload</TabsTrigger>
         <TabsTrigger value="manual">Manual</TabsTrigger>
       </TabsList>
-      
+
       {error && (
-        <div className="bg-destructive/20 p-3 mt-2 rounded-md text-destructive">
-          {error}
-        </div>
+        <div className="bg-destructive/20 text-destructive mt-2 rounded-md p-3">{error}</div>
       )}
-      
+
       <TabsContent value="upload" className="flex flex-col">
-        {success || insuranceData ? (
+        {isLoading ? (
           <div className="flex items-center justify-center">
-            <CircleCheck className="mt-12 mb-12 size-16" />
+            <Spinner className="mt-12 mb-12 size-16" />
           </div>
         ) : (
-          submitElements
+          <FilePhotoUpload
+            onFilesChange={handleFilesChange}
+            title=""
+            subtitle="PDF, JPG, or PNG (max 10 files)"
+          />
         )}
-        {!success && !insuranceData && (
-          <Button 
-            className="mt-4 w-full" 
-            onClick={handleFileUploadSubmit}
-            disabled={isLoading || isSubmitting || files.length === 0}
-          >
-            Submit
-          </Button>
-        )}
+        <Button
+          className="mt-4 w-full"
+          onClick={handleFileUploadSubmit}
+          disabled={isLoading || isSubmitting || files.length === 0}
+        >
+          Submit
+        </Button>
       </TabsContent>
       <TabsContent value="manual" className="p-4">
-        <InsuranceStepForm 
-          onSubmit={handleFormSubmit} 
-          defaultValues={existingRecord ? existingRecord.data as InsuranceCard : undefined}
+        <InsuranceStepForm
+          onSubmit={handleFormSubmit}
+          defaultValues={existingRecord ? (existingRecord.data as InsuranceCard) : undefined}
           isEdit={!!existingRecord}
         />
       </TabsContent>
