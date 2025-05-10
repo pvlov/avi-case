@@ -1,4 +1,5 @@
 export interface MedicalDocument {
+  generatedTitle?: string;
   dateIssued: string | null;
   doctorName: string | null;
   patient: {
@@ -9,11 +10,7 @@ export interface MedicalDocument {
     weight_kg: number | null;
     bmi: number | null;
   };
-  vitals: {
-    blood_pressure: string | null;
-    heart_rate: number | null;
-    temperature_c: number | null;
-  };
+  vitals: Vitals;
   anamnesis: string | null;
   statusAtAdmission: string | null;
   diagnosis: string[];
@@ -23,14 +20,14 @@ export interface MedicalDocument {
     date: string | null;
     details: string | null;
   };
-  lab_parameters: string[];
+  lab_parameters: LabParameter[];
   procedures: {
     name: string;
     date: string | null;
     indication: string | null;
     findings: string | null;
   }[];
-  planned_procedures: {
+  planned_procedures?: {
     name: string;
     date: string | null;
     indication: string | null;
@@ -42,6 +39,27 @@ export interface MedicalDocument {
     duration: string | null;
   }[];
   discharge_notes: string | null;
+}
+
+export interface LabParameter {
+  name: string;
+  quantity: number;
+  unit: string;
+}
+
+export interface Vitals {
+  blood_pressure: string | null;
+  heart_rate: number | null;
+  temperature_c: number | null;
+  respiratory_rate: number | null;
+}
+
+export interface Procedure {
+  name: string;
+  date: string | null;
+  indication: string | null;
+  findings: string | null;
+  documentId?: string;
 }
 
 export interface Medication {
@@ -88,4 +106,15 @@ export interface SpecialTest {
   date: Date;
   reaction?: string;
   issuer?: string;
+}
+
+export interface VaccinationPass {
+  person: {
+    name: string;
+    date_of_birth: string;
+    gender: string | null;
+  };
+  vaccinations: Vaccination[];
+  special_tests: SpecialTest[];
+  allergies_or_medical_notes: string[];
 }

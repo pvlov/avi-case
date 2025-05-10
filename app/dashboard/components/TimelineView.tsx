@@ -26,8 +26,7 @@ export function TimelineView({ items, onHover }: TimelineViewProps) {
           {items.map((item) => (
             <div key={item.id} className="relative">
               {/* Timeline Dot */}
-              <div className="absolute -left-8 top-4 w-3 h-3 rounded-full bg-primary border-2 border-background" />
-              
+              <div className="absolute left-[1px] top-1/2 -translate-x-1/2 -translate-y-1/2 w-3 h-3 rounded-full bg-primary ring-4 ring-background" />
               <Card 
                 className={cn(
                   "transition-colors duration-200 hover:bg-accent/50",
