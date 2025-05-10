@@ -18,7 +18,7 @@ export default function Home() {
           Navigate the medical system with{" "}
           <span className="text-avi-purple dark:text-avi-green">ease.</span>
         </h1>
-        <p className="text-muted-foreground mb-8 text-xl">
+        <p className="text-muted-foreground dark:text-white mb-8 text-xl">
           Simplify your healthcare experience with our intuitive platform that helps you manage your
           medical records, insurance information, and more in one place with powerful automation.
         </p>
