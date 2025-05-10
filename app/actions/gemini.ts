@@ -86,6 +86,14 @@ const PROMPTS: Record<string, string> = {
         "details": "string | null"
       },
       "lab_parameters": ["string"],
+      "laboratory_results": [
+        {
+          "test_name": "string",                // e.g. "Hemoglobin", "CRP"
+          "value": "number or string",          // numeric if possible, else string
+          "unit": "string or null",             // e.g. "g/dL", "mg/L"
+          "reference_range": "string or null",  // e.g. "12–16 g/dL"
+        }
+      ],
       "procedures": [
         {
           "name": "string",
