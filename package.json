@@ -15,6 +15,7 @@
     "@radix-ui/react-popover": "^1.1.13",
     "@radix-ui/react-progress": "^1.1.6",
     "@radix-ui/react-slot": "^1.2.2",
+    "@google/genai": "^0.13.0",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "lucide": "^0.509.0",

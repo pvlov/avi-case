@@ -48,3 +48,6 @@ bun-debug.log*
 # prettier
 .prettiercache
 .prettierrc.local
+
+# env
+.env
