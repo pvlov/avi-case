@@ -71,19 +71,36 @@ export enum DocType {
   VACCINEPASS = "vaccinepass",
 }
 
-export interface Vaccination {
-  vaccine: string;
+// Individual vaccination entry interface
+export interface VaccinationEntry {
+  vaccine: string;         // e.g. MMR, Tetanus, COVID-19
   date: Date;
-  trade_name?: string;
-  batch_number?: string;
-  doctor?: string;
-  location?: string;
-  notes?: string;
+  trade_name?: string;     // e.g. Infanrix, Comirnaty
+  batch_number?: string;   // from the sticker (Ch.-B. or similar)
+  doctor?: string;         // doctor or practice name
+  location?: string;       // practice, city, stamp
+  notes?: string;          // optional handwritten comments, remarks, booster info
 }
 
+// Special test interface for TB, Yellow Fever, etc.
 export interface SpecialTest {
-  type: string;
+  type: string;            // "Tuberculosis", "Yellow Fever", "Hepatitis B", etc.
   date: Date;
   reaction?: string;
   issuer?: string;
 }
+
+// Complete vaccination pass document interface
+export interface VaccinationPass {
+  person: {
+    name: string | null;
+    date_of_birth: string | null;
+    gender: string | null;
+  };
+  vaccinations: VaccinationEntry[];
+  special_tests: SpecialTest[];
+  allergies_or_medical_notes: string[];
+}
+
+// For backward compatibility - individual vaccination entry
+export interface Vaccination extends VaccinationEntry {}
