@@ -68,14 +68,9 @@ export default function Patient() {
   };
 
   return (
-    <Section className="flex h-[calc(100vh-3.5rem)] flex-col gap-4 py-4">
-      <div className="flex flex-col gap-4">
-        <div>
-          <h1 className="text-4xl font-bold">Patient</h1>
-          <p className="text-muted-foreground">
-            Upload and manage your medical information securely
-          </p>
-        </div>
+    <Section className="flex min-h-[calc(100vh-3.5rem)] flex-col gap-4">
+      <div className="flex flex-col gap-2">
+        <h1 className="text-3xl font-bold">Patient</h1>
         <StepProgressIndicator steps={steps} currentStep={currentStep} />
       </div>
       <Card className="flex flex-1 flex-col">
@@ -85,7 +80,7 @@ export default function Patient() {
         </CardHeader>
         <CardContent className="flex-1">{renderStepContent()}</CardContent>
       </Card>
-      <div className="flex justify-between pt-4">
+      <div className="flex justify-between">
         <Button
           variant="outline"
           size="sm"
