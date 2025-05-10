@@ -18,7 +18,6 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { useState } from "react";
 
 interface VaccinationTableProps {
   data: VaccinationPass | null;
@@ -28,17 +27,14 @@ interface VaccinationTableProps {
 
 function formatDate(dateString: string | null | undefined): string {
   if (!dateString) return "N/A";
-
-  try {
-    const date = new Date(dateString);
-    return date.toLocaleDateString("en-US", {
-      year: "numeric",
-      month: "short",
-      day: "numeric",
-    });
-  } catch {
-    return dateString || "N/A";
-  }
+  const date = new Date(dateString);
+  return isNaN(date.getTime())
+    ? dateString
+    : date.toLocaleDateString("en-US", {
+        year: "numeric",
+        month: "short",
+        day: "numeric",
+      });
 }
 
 export function VaccinationTable({
@@ -49,7 +45,9 @@ export function VaccinationTable({
   if (!data || data.vaccinations.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center py-8 text-center">
-        <p className="text-muted-foreground mb-4">No vaccination records found.</p>
+        <p className="text-muted-foreground mb-4">
+          No vaccination records found.
+        </p>
         <Button onClick={onAddVaccination} variant="default" className="gap-2">
           <Plus className="h-4 w-4" />
         </Button>
@@ -58,61 +56,60 @@ export function VaccinationTable({
   }
 
   return (
-    <div className="space-y-2">
+    <div className="space-y-4">
       <div className="flex items-center justify-between">
         <h3 className="text-lg font-medium">Vaccinations</h3>
         <Button
           onClick={onAddVaccination}
           variant="outline"
           size="sm"
-          className="ml-auto h-7 w-7 p-0"
+          className="h-7 w-7 p-0"
         >
           <Plus className="h-4 w-4" />
         </Button>
       </div>
 
-      {/* Mobile Accordion (hidden on md and above) */}
+      {/* Mobile Accordion */}
       <div className="md:hidden">
         <Accordion type="single" collapsible className="w-full">
           {data.vaccinations.map((vax, index) => (
-            <AccordionItem key={index} value={`item-${index}`} className="border-b">
-              <AccordionTrigger className="py-3 hover:no-underline">
-                <div className="flex w-full items-center justify-between pr-4">
+            <AccordionItem key={index} value={`item-${index}`}>
+              {/* trigger + edit button side by side */}
+              <div className="flex items-center border-b">
+                <AccordionTrigger className="flex-1 py-3 text-left">
                   <Badge variant="outline" className="px-2 py-1">
                     {vax.vaccine}
                   </Badge>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      onEditVaccination(index);
-                    }}
-                    className="h-8 w-8 p-0"
-                  >
-                    <Pencil className="h-4 w-4" />
-                  </Button>
-                </div>
-              </AccordionTrigger>
-              <AccordionContent>
-                <div className="rounded-md pt-1 pb-3">
-                  <div className="flex flex-col space-y-2 text-sm">
-                    <div className="grid grid-cols-2">
-                      <span className="text-muted-foreground">Date</span>
-                      <span>{vax.date ? formatDate(vax.date) : "N/A"}</span>
-                    </div>
-                    <div className="grid grid-cols-2">
-                      <span className="text-muted-foreground">Trade Name</span>
-                      <span>{vax.trade_name || "N/A"}</span>
-                    </div>
-                    <div className="grid grid-cols-2">
-                      <span className="text-muted-foreground">Batch Number</span>
-                      <span>{vax.batch_number || "N/A"}</span>
-                    </div>
-                    <div className="grid grid-cols-2">
-                      <span className="text-muted-foreground">Doctor</span>
-                      <span>{vax.doctor || "N/A"}</span>
-                    </div>
+                </AccordionTrigger>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onEditVaccination(index);
+                  }}
+                  className="h-8 w-8 p-0"
+                >
+                  <Pencil className="h-4 w-4" />
+                </Button>
+              </div>
+              <AccordionContent className="pb-4">
+                <div className="space-y-2 text-sm">
+                  <div className="grid grid-cols-2">
+                    <span className="text-muted-foreground">Date</span>
+                    <span>{formatDate(vax.date)}</span>
+                  </div>
+                  <div className="grid grid-cols-2">
+                    <span className="text-muted-foreground">Trade Name</span>
+                    <span>{vax.trade_name || "N/A"}</span>
+                  </div>
+                  <div className="grid grid-cols-2">
+                    <span className="text-muted-foreground">Batch Number</span>
+                    <span>{vax.batch_number || "N/A"}</span>
+                  </div>
+                  <div className="grid grid-cols-2">
+                    <span className="text-muted-foreground">Doctor</span>
+                    <span>{vax.doctor || "N/A"}</span>
                   </div>
                 </div>
               </AccordionContent>
@@ -121,8 +118,8 @@ export function VaccinationTable({
         </Accordion>
       </div>
 
-      {/* Desktop Table (hidden on small screens) */}
-      <div className="hidden max-w-full overflow-x-auto md:block">
+      {/* Desktop Table */}
+      <div className="hidden overflow-x-auto md:block">
         <Table className="w-full">
           <TableHeader>
             <TableRow>
@@ -142,7 +139,7 @@ export function VaccinationTable({
                     {vax.vaccine}
                   </Badge>
                 </TableCell>
-                <TableCell>{vax.date ? formatDate(vax.date) : "N/A"}</TableCell>
+                <TableCell>{formatDate(vax.date)}</TableCell>
                 <TableCell>{vax.trade_name || "N/A"}</TableCell>
                 <TableCell>{vax.batch_number || "N/A"}</TableCell>
                 <TableCell>{vax.doctor || "N/A"}</TableCell>
