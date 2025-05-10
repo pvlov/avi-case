@@ -13,69 +13,48 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { InsuranceCardData } from "@/types/medical";
+import { Vaccination } from "@/types/medical";
+import { Textarea } from "@/components/ui/textarea";
 
 // Create a schema for form validation
 const formSchema = z.object({
-  insurerName: z.string().min(2, {
-    message: "Insurer name must be at least 2 characters.",
+  vaccine: z.string().min(2, {
+    message: "Vaccine name must be at least 2 characters.",
   }),
-  insurerId: z.string().min(1, {
-    message: "Insurer ID is required.",
+  date: z.string().min(1, {
+    message: "Vaccination date is required.",
   }),
-  memberId: z.string().min(1, {
-    message: "Member ID is required.",
-  }),
-  givenName: z.string().min(1, {
-    message: "Given name is required.",
-  }),
-  familyName: z.string().min(1, {
-    message: "Family name is required.",
-  }),
-  dateOfBirth: z.string().min(1, {
-    message: "Date of birth is required.",
-  }),
-  validFrom: z.string().min(1, {
-    message: "Valid from date is required.",
-  }),
-  validTo: z.string().min(1, {
-    message: "Valid to date is required.",
-  }),
-  cardSerialNumber: z.string(),
-  cardNumber: z.string().min(1, {
-    message: "Card number is required.",
-  }),
+  trade_name: z.string().optional(),
+  batch_number: z.string().optional(),
+  doctor: z.string().optional(),
+  location: z.string().optional(),
+  notes: z.string().optional(),
 });
 
 type FormValues = z.infer<typeof formSchema>;
 
-interface InsuranceStepFormProps {
-  onSubmit?: (data: InsuranceCardData) => void;
+interface VaccinationStepFormProps {
+  onSubmit?: (data: Vaccination) => void;
 }
 
-export function VaccinationStepForm({ onSubmit }: InsuranceStepFormProps) {
+export function VaccinationStepForm({ onSubmit }: VaccinationStepFormProps) {
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      insurerName: "",
-      insurerId: "",
-      memberId: "",
-      givenName: "",
-      familyName: "",
-      dateOfBirth: "",
-      validFrom: "",
-      validTo: "",
-      cardSerialNumber: "",
-      cardNumber: "",
+      vaccine: "",
+      date: "",
+      trade_name: "",
+      batch_number: "",
+      doctor: "",
+      location: "",
+      notes: "",
     },
   });
 
   function handleSubmit(values: FormValues) {
-    const data: InsuranceCardData = {
+    const data: Vaccination = {
       ...values,
-      dateOfBirth: new Date(values.dateOfBirth),
-      validFrom: new Date(values.validFrom),
-      validTo: new Date(values.validTo),
+      date: new Date(values.date),
     };
 
     if (onSubmit) {
@@ -89,18 +68,18 @@ export function VaccinationStepForm({ onSubmit }: InsuranceStepFormProps) {
     <Form {...form}>
       <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
         <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-          {/* Insurer Information */}
+          {/* Vaccine Information */}
           <div className="space-y-4">
-            <h3 className="text-lg font-medium">Insurer Information</h3>
+            <h3 className="text-lg font-medium">Vaccine Information</h3>
 
             <FormField
               control={form.control}
-              name="insurerName"
+              name="vaccine"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Insurer Name</FormLabel>
+                  <FormLabel>Vaccine Name</FormLabel>
                   <FormControl>
-                    <Input placeholder="e.g. Blue Cross" {...field} />
+                    <Input placeholder="e.g. COVID-19, Influenza" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -109,12 +88,26 @@ export function VaccinationStepForm({ onSubmit }: InsuranceStepFormProps) {
 
             <FormField
               control={form.control}
-              name="insurerId"
+              name="trade_name"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Insurer ID</FormLabel>
+                  <FormLabel>Trade Name</FormLabel>
                   <FormControl>
-                    <Input placeholder="e.g. BC1234" {...field} />
+                    <Input placeholder="e.g. Pfizer, Moderna" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="batch_number"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Batch Number</FormLabel>
+                  <FormControl>
+                    <Input placeholder="e.g. BX6738" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -122,18 +115,18 @@ export function VaccinationStepForm({ onSubmit }: InsuranceStepFormProps) {
             />
           </div>
 
-          {/* Member Information */}
+          {/* Administration Details */}
           <div className="space-y-4">
-            <h3 className="text-lg font-medium">Member Information</h3>
+            <h3 className="text-lg font-medium">Administration Details</h3>
 
             <FormField
               control={form.control}
-              name="memberId"
+              name="date"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Member ID</FormLabel>
+                  <FormLabel>Vaccination Date</FormLabel>
                   <FormControl>
-                    <Input placeholder="e.g. 123456789" {...field} />
+                    <Input type="date" placeholder="YYYY-MM-DD" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -142,12 +135,12 @@ export function VaccinationStepForm({ onSubmit }: InsuranceStepFormProps) {
 
             <FormField
               control={form.control}
-              name="cardNumber"
+              name="doctor"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Card Number</FormLabel>
+                  <FormLabel>Administering Doctor</FormLabel>
                   <FormControl>
-                    <Input placeholder="e.g. 987654321" {...field} />
+                    <Input placeholder="e.g. Dr. Smith" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -156,12 +149,12 @@ export function VaccinationStepForm({ onSubmit }: InsuranceStepFormProps) {
 
             <FormField
               control={form.control}
-              name="cardSerialNumber"
+              name="location"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Card Serial Number</FormLabel>
+                  <FormLabel>Location</FormLabel>
                   <FormControl>
-                    <Input placeholder="e.g. SN12345" {...field} />
+                    <Input placeholder="e.g. City Medical Center" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -170,91 +163,32 @@ export function VaccinationStepForm({ onSubmit }: InsuranceStepFormProps) {
           </div>
         </div>
 
-        <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-          {/* Personal Information */}
-          <div className="space-y-4">
-            <h3 className="text-lg font-medium">Personal Information</h3>
+        {/* Additional Notes */}
+        <div className="space-y-4">
+          <h3 className="text-lg font-medium">Additional Information</h3>
 
-            <FormField
-              control={form.control}
-              name="givenName"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Given Name</FormLabel>
-                  <FormControl>
-                    <Input placeholder="e.g. John" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name="familyName"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Family Name</FormLabel>
-                  <FormControl>
-                    <Input placeholder="e.g. Doe" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name="dateOfBirth"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Date of Birth</FormLabel>
-                  <FormControl>
-                    <Input type="date" placeholder="YYYY-MM-DD" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-          </div>
-
-          {/* Card Validity */}
-          <div className="space-y-4">
-            <h3 className="text-lg font-medium">Card Validity</h3>
-
-            <FormField
-              control={form.control}
-              name="validFrom"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Valid From</FormLabel>
-                  <FormControl>
-                    <Input type="date" placeholder="YYYY-MM-DD" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name="validTo"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Valid To</FormLabel>
-                  <FormControl>
-                    <Input type="date" placeholder="YYYY-MM-DD" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-          </div>
+          <FormField
+            control={form.control}
+            name="notes"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Notes</FormLabel>
+                <FormControl>
+                  <Textarea
+                    placeholder="Any additional information about the vaccination..."
+                    className="min-h-[100px]"
+                    {...field}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
         </div>
 
-        <Button type="submit" className="w-full">
-          Submit
-        </Button>
+        <div className="flex justify-end">
+          <Button type="submit">Save Vaccination Record</Button>
+        </div>
       </form>
     </Form>
   );

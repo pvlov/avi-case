@@ -252,9 +252,9 @@ export function InsuranceStepForm({ onSubmit }: InsuranceStepFormProps) {
           </div>
         </div>
 
-        <Button type="submit" className="w-full">
-          Submit
-        </Button>
+        <div className="flex justify-end">
+          <Button type="submit">Save Insurance Information</Button>
+        </div>
       </form>
     </Form>
   );
