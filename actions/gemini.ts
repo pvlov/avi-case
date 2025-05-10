@@ -4,14 +4,15 @@ import { GoogleGenAI, createPartFromUri } from "@google/genai";
 import { ContentListUnion } from "@google/genai/node";
 import { randomUUID, UUID } from "crypto";
 import { Result, ok, err, UploadInfo, flatten } from "../types/util";
+import { DocType } from "../types/medical";
 
 enum FileState {
   PROCESSING = "PROCESSING",
   FAILED = "FAILED",
 }
 
-const PROMPTS: Record<string, string> = {
-  vaccinepass: `
+const PROMPTS: Record<DocType, string> = {
+  [DocType.VACCINEPASS]: `
     You are a medical data assistant. Analyze the attached images of a German vaccination pass (Impfpass).
     ***IMPORTANT: EXTRACT VACCINATION NAME ONLY FROM THE INDIVIDUAL STICKERS.*** Do NOT use any printed headers, titles, or sheet information. Only use the content visible directly on each vaccination sticker (vaccine name).
     Extract all vaccination entries and present them in valid JSON format.
@@ -57,74 +58,72 @@ const PROMPTS: Record<string, string> = {
 
     If any fields are missing or unclear, use null.
   `,
-  document: `
+  [DocType.DOCUMENT]: `
     You are given one or more images of German-language doctor’s notes as text.
     Your task is to extract all relevant medical information and output it as a structured JSON object following the exact schema below.
     Try to merge the different pages separated by ----- into one coherent document.
     The date is of utmost importance and usually located at the top of the page.
     Always output strict JSON with no additional text or explanation—only the JSON structure shown.
+
     ## JSON Schema and Fields
-    {
-      "date": "YYYY-MM-DD",
-      "patient": {
-        "name": "string | null",
-        "birth_date": "string | null",
-        "gender": "string | null",
-        "height_cm": "number | null",
-        "weight_kg": "number | null",
-        "bmi": "number | null"
-      },
-      "vitals": {
-        "blood_pressure": "string | null",
-        "heart_rate": "number | null",
-        "temperature_c": "number | null"
-      },
-      "anamnesis": "string | null",
-      "diagnosis": ["string"],
-      "therapy": ["string"],
-      "ekg": {
-        "date": "string | null",
-        "details": "string | null"
-      },
-      "lab_parameters": ["string"],
-      "laboratory_results": [
-        {
-          "test_name": "string",                // e.g. "Hemoglobin", "CRP"
-          "value": "number or string",          // numeric if possible, else string
-          "unit": "string or null",             // e.g. "g/dL", "mg/L"
-          "reference_range": "string or null",  // e.g. "12–16 g/dL"
-        }
-      ],
-      "procedures": [
-        {
-          "name": "string",
-          "date": "string | null",
-          "indication": "string | null",
-          "findings": "string | null"
-        }
-      ],
-      "medications": [
-        {
-          name: "string"
-          dosis: "string | null",
-          frequency: "string | null",
-        }
-      ],
-      "discharge_notes": "string | null"
+    MedicalDocument {
+      dateIssued: string | null (YYYY-MM-DD format); // e.g. 2023-10-01
+      doctorName: string | null; // e.g. Dr. Max Mustermann
+      patient: {
+        name: string | null;
+        birth_date: string | null;
+        gender: string | null;
+        height_cm: number | null;
+        weight_kg: number | null;
+        bmi: number | null;
+      };
+      vitals: {
+        blood_pressure: string | null;
+        heart_rate: number | null;
+        temperature_c: number | null;
+      };
+      anamnesis: string | null;
+      statusAtAdmission: string | null;
+      diagnosis: string[];
+      therapy: string[];
+      progress: string | null;
+      ekg: {
+        date: string | null;
+        details: string | null;
+      };
+      lab_parameters: string[];
+      procedures: {
+        name: string;
+        date: string | null;
+        indication: string | null;
+        findings: string | null;
+      }[];
+      planned_procedures: {
+        name: string;
+        date: string | null;
+        indication: string | null;
+      }[];
+      medications: {
+        name: string;
+        dosage: string | null;
+        frequency: string | null;
+        duration: string | null;
+      }[];
+      discharge_notes: string | null;
     }
     All fields must be present. If a particular piece of information is missing or cannot be determined, use null for string or number fields, and use an empty array ([]) for list fields.
     For numeric fields (height_cm, weight_kg, bmi, heart_rate, temperature_c), output a number (strip units if present) or null. For example, if the note says “75 kg”, output 75 (as a number) for weight_kg.
     For list fields (diagnosis, therapy, lab_parameters, medications), output an array of strings. If there are multiple diagnoses or therapies, include each as a separate string. If none are present, use an empty array.
     For the procedures array, each entry must be an object with keys "name", "date", "indication", and "findings". Fill each with the relevant text (or null if not available). If no procedures are listed, use an empty array.
     Keep the field names exactly as shown (in English).
+
     ## Output Requirements and Validation
-    Strict JSON only: Your final answer must be valid JSON following the schema. Do NOT include any Markdown, bullet points, or explanatory text in the output. No comments or extra fields. The Output needs to be a valid JSON object.
+    Strict JSON only: Your final answer must be valid JSON following the schema. Do NOT include any Markdown, bullet points, or explanatory text in the output. No comments or extra fields. The output should be a string that contains valid JSON.
     Ensure all keys are enclosed in double quotes and strings are properly quoted. Do not include trailing commas.
     Include every field from the schema. For example, even if no temperature is listed, output "temperature_c": null under vitals.
     Be conservative with uncertain information. If a field cannot be reliably read or is missing, use null (or an empty list for list fields) rather than guessing.
   `,
-  insurancecard:
-  `You are an expert OCR-and-data-extraction engine tasked with converting all printed and encoded fields from a German electronic Gesundheitskarte (eGK) into a strict   JSON format. Follow these rules exactly:
+  [DocType.INSURANCECARD]: `You are an expert OCR-and-data-extraction engine tasked with converting all printed and encoded fields from a German electronic Gesundheitskarte (eGK) into a strict   JSON format. Follow these rules exactly:
     1. *Schema* – always output a single JSON object with these keys (in this order):
       {
         "insurerName": string,        // full official name of the Krankenkasse
@@ -140,7 +139,7 @@ const PROMPTS: Record<string, string> = {
       }
     2. *Output* – emit *only* valid JSON (no explanations, no markdown fences).
     3. *Missing or unreadable data* – if a field is missing or illegible in the OCR/text/codes, set its value to *null. Do **not* guess or invent values.
-    4. *Validation* – 
+    4. *Validation* –
       - Dates must conform to ISO-8601 (YYYY-MM-DD or YYYY-MM).
       - 'insurerId' must be purely numeric; correct obvious OCR errors (e.g. “O”→“0”), but if still uncertain, use null.
     5. *No extra keys* – do not include any fields outside the schema above.
@@ -148,8 +147,7 @@ const PROMPTS: Record<string, string> = {
 
     User:
     Below is the raw text (OCR) and any visible codes from the card. Parse and return JSON.`,
-  raw: "Extract all visible text into one string.",
-  extractText: "Extract all visible text into one string",
+  [DocType.RAW]: "Extract all visible text into one string.",
 };
 
 const MODEL = "gemini-2.0-flash";
@@ -161,6 +159,12 @@ const ai = new GoogleGenAI({
 
 async function sleep(ms: number) {
   return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+function stripFirstAndLastLine(str: string) {
+  const lines = str.split("\n");
+  if (lines.length <= 2) return ""; // Nothing to return if there are 2 or fewer lines
+  return lines.slice(1, -1).join("\n");
 }
 
 const uploadAndFetch = async (
@@ -221,7 +225,7 @@ const extractAndMerge = async (uploadInfos: UploadInfo[]): Promise<Result<string
   const extractedTexts = await Promise.all(
     uploadInfos.map((info) => {
       const content: ContentListUnion = [
-        PROMPTS.extractText,
+        PROMPTS[DocType.RAW],
         createPartFromUri(info.uri, info.mimeType),
       ];
 
@@ -257,16 +261,16 @@ export const extractTextFromDocuments = async (blobs: Blob[]): Promise<Result<st
   return ok(extractedTexts.value!);
 };
 
-export const parseDocuments = async (formData: FormData): Promise<Result<string, string>> => {
+export const parseDocuments = async <T>(formData: FormData): Promise<Result<T, string>> => {
   const blobs = formData.getAll("image") as Blob[];
-  const documentType = formData.get("documentType") as string;
+  const documentType = formData.get("documentType") as DocType;
   const text = await extractTextFromDocuments(blobs);
 
   if (text.error) {
     return err(text.error);
   }
 
-  const content: ContentListUnion = [PROMPTS[documentType] || PROMPTS.raw, text.value!];
+  const content: ContentListUnion = [PROMPTS[documentType] || PROMPTS[DocType.RAW], text.value!];
 
   // Send it all off to Gemini
   const response = await ai.models.generateContent({
@@ -278,5 +282,10 @@ export const parseDocuments = async (formData: FormData): Promise<Result<string,
     return err("No response from Gemini");
   }
 
-  return ok(response.text);
+  try {
+    return ok(JSON.parse(stripFirstAndLastLine(response.text)) as T);
+  } catch (e) {
+    console.log(response.text);
+    return err("Invalid JSON response from Gemini: " + e);
+  }
 };
