@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useRef, useState, useEffect } from 'react';
+import React, { useRef, useState, useEffect } from "react";
 
 export default function Camera() {
   const videoRef = useRef<HTMLVideoElement>(null);
@@ -18,7 +18,7 @@ export default function Camera() {
           videoRef.current.play();
         }
       })
-      .catch((err) => setError(err.message || 'Could not access camera'));
+      .catch((err) => setError(err.message || "Could not access camera"));
 
     return () => {
       const stream = videoRef.current?.srcObject as MediaStream;
@@ -36,9 +36,9 @@ export default function Camera() {
     const canvas = canvasRef.current;
     canvas.width = video.videoWidth;
     canvas.height = video.videoHeight;
-    const ctx = canvas.getContext('2d');
+    const ctx = canvas.getContext("2d");
     if (!ctx) {
-      setError('Canvas context unavailable');
+      setError("Canvas context unavailable");
       setLoading(false);
       return;
     }
@@ -46,15 +46,15 @@ export default function Camera() {
 
     try {
       const blob: Blob | null = await new Promise((resolve) =>
-        canvas.toBlob((b) => resolve(b), 'image/jpeg')
+        canvas.toBlob((b) => resolve(b), "image/jpeg"),
       );
-      if (!blob) throw new Error('Failed to capture image');
+      if (!blob) throw new Error("Failed to capture image");
 
       const formData = new FormData();
-      formData.append('image', blob, 'snapshot.jpg');
+      formData.append("image", blob, "snapshot.jpg");
 
-      const res = await fetch('/api/gemini', {
-        method: 'POST',
+      const res = await fetch("/api/gemini", {
+        method: "POST",
         body: formData,
       });
       const data = await res.json();
@@ -68,32 +68,27 @@ export default function Camera() {
   };
 
   return (
-    <div className="p-4 max-w-md mx-auto space-y-4">
+    <div className="mx-auto max-w-md space-y-4 p-4">
       {error && <p className="text-red-600">Error: {error}</p>}
 
-      <video
-        ref={videoRef}
-        className="w-full rounded bg-black"
-        playsInline
-        muted
-      />
+      <video ref={videoRef} className="w-full rounded bg-black" playsInline muted />
 
       <button
         onClick={captureAndSend}
         disabled={loading}
-        className="w-full bg-blue-600 text-white py-2 rounded disabled:opacity-50"
+        className="w-full rounded bg-blue-600 py-2 text-white disabled:opacity-50"
       >
-        {loading ? 'Sending to Gemini…' : 'Capture & Send to Gemini'}
+        {loading ? "Sending to Gemini…" : "Capture & Send to Gemini"}
       </button>
 
       {response && (
-        <div className="p-4 bg-gray-100 rounded">
-          <h3 className="font-semibold mb-2">Gemini says:</h3>
+        <div className="rounded bg-gray-100 p-4">
+          <h3 className="mb-2 font-semibold">Gemini says:</h3>
           <p className="whitespace-pre-wrap">{response}</p>
         </div>
       )}
 
-      <canvas ref={canvasRef} style={{ display: 'none' }} />
+      <canvas ref={canvasRef} style={{ display: "none" }} />
     </div>
   );
 }

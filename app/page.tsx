@@ -2,8 +2,8 @@
 
 import * as React from "react";
 import { useState } from "react";
-import { parseDocuments } from "./actions/gemini";
-import { isSuccess } from "./types/util";
+import { isSuccess } from "../types/util";
+import { parseDocuments } from "@/actions/gemini";
 
 export default function DocumentParser() {
   const [files, setFiles] = useState<File[]>([]);
@@ -45,7 +45,7 @@ export default function DocumentParser() {
       clearInterval(interval);
 
       if (isSuccess(result)) {
-        setExtractedData(result.value);
+        setExtractedData(result.value as string);
         setProgress("Extraction complete!");
       } else {
         setProgress("");
