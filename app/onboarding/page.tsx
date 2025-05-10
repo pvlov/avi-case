@@ -1,5 +1,6 @@
 "use client";
 
+import React from "react";
 import { Section } from "@/components/section";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Step } from "@/types/patient";
@@ -8,9 +9,8 @@ import { Button } from "@/components/ui/button";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { useState } from "react";
 import InsuranceStep from "./components/DocTypeComponents/InsuranceCard/InsuranceStep";
-import MedicalHistoryStep from "./components/DocTypeComponents/MedicalHistoryStep";
+import MedicalDocumentStep from "./components/DocTypeComponents/MedicalDocument/MedicalDocumentStep";
 import VaccinationStep from "./components/DocTypeComponents/Vaccinations/VaccinationStep";
-import PrescriptionStep from "./components/DocTypeComponents/PrescriptionStep";
 import { DocType } from "@/types/medical";
 import ReasonForVisitStep from "@/app/onboarding/components/DocTypeComponents/ReasonForVisitStep";
 
@@ -19,17 +19,24 @@ interface OnboardingStep extends Step {
   docType: DocType;
 }
 
+// Type for component mapping
+type ComponentMap = {
+  [key in DocType]?: React.ComponentType<any>;
+} & {
+  getComponent(docType: DocType): React.ReactNode;
+};
+
 // Component factory - maps document types to their components
-const ComponentFactory = {
+const ComponentFactory: ComponentMap = {
   [DocType.INSURANCECARD]: InsuranceStep,
   [DocType.VACCINEPASS]: VaccinationStep,
-  [DocType.DOCUMENT]: MedicalHistoryStep,
+  [DocType.DOCUMENT]: MedicalDocumentStep,
   [DocType.RAW]: PrescriptionStep,
   [DocType.REASONFORVISIT]: ReasonForVisitStep, // Placeholder for ReasonForVisitStep
 
   // Get the component for a specific docType
-  getComponent(docType: DocType) {
-    const Component = this[docType];
+  getComponent(docType: DocType): React.ReactNode {
+    const Component = this[docType] as React.ComponentType<any> | undefined;
     return Component ? <Component /> : null;
   },
 };
@@ -45,29 +52,21 @@ const steps: OnboardingStep[] = [
   {
     stepNum: 2,
     label: "Insurance Information",
-    description: "Upload your insurance details and coverage information",
+    description: "Upload your insurance details and coverage information.",
     docType: DocType.INSURANCECARD,
   },
   {
     stepNum: 3,
     label: "Vaccination Records",
-    description: "Upload your vaccination records, including any previous vaccinations or boosters",
+    description: "Upload your vaccination records, including any previous vaccinations or boosters.",
     docType: DocType.VACCINEPASS,
   },
   {
     stepNum: 4,
-    label: "Medical History",
-    description: "Upload your medical history, including any previous illnesses or conditions",
+    label: "Medical Documents",
+    description: "Upload your medical documents, including any previous illnesses, medications, conditions and treatments.",
     docType: DocType.DOCUMENT,
   },
-  {
-    stepNum: 5,
-    label: "Prescription Records",
-    description:
-      "Upload your prescription records, including any previous medications or treatments",
-    docType: DocType.RAW,
-  },
-
 ];
 
 export default function Onboarding() {

@@ -15,8 +15,8 @@ import {
 export function Navbar() {
   return (
     <div className="bg-background/95 supports-[backdrop-filter]:bg-background/60 fixed top-0 right-0 left-0 z-50 flex h-12 items-center border-b px-10 shadow-sm backdrop-blur">
-      <NavigationMenu>
-        <NavigationMenuList>
+      <NavigationMenu className="w-full">
+        <NavigationMenuList className="flex justify-center md:justify-start w-full">
           <NavigationMenuItem>
             <NavigationMenuLink
               className={cn(navigationMenuTriggerStyle(), "bg-transparent hover:bg-transparent")}
@@ -50,18 +50,7 @@ export function Navbar() {
               )}
               asChild
             >
-              <Link href={""}>n/avi</Link>
-            </NavigationMenuLink>
-          </NavigationMenuItem>
-          <NavigationMenuItem>
-            <NavigationMenuLink
-              className={cn(
-                navigationMenuTriggerStyle(),
-                "hover:bg-avi-green/20 bg-transparent transition-all duration-300",
-              )}
-              asChild
-            >
-              <Link href={""}>n/avi</Link>
+              <Link href="/dashboard">Dashboard</Link>
             </NavigationMenuLink>
           </NavigationMenuItem>
         </NavigationMenuList>
