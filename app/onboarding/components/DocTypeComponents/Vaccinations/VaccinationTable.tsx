@@ -40,8 +40,7 @@ export function VaccinationTable({
 
   return (
     <div className="space-y-4">
-      <div className="flex justify-between items-center">
-        <h3 className="text-lg font-medium">Vaccination Records</h3>
+      <div className="flex justify-end items-center">
         <Button 
           onClick={onAddVaccination} 
           variant="outline" 
@@ -49,7 +48,7 @@ export function VaccinationTable({
           className="gap-2"
         >
           <Plus className="h-4 w-4" />
-          Add New
+          Add Vaccination
         </Button>
       </div>
       
