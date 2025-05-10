@@ -1,6 +1,7 @@
 export interface MedicalDocument {
   dateIssued: string | null;
   doctorName: string | null;
+  generatedTitle: string;
   patient: {
     name: string | null;
     birth_date: string | null;
