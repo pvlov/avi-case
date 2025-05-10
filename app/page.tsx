@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import { useState } from "react";
-import { parseDocument } from "./actions/gemini";
+import { parseDocuments } from "./actions/gemini";
 import { isSuccess } from "./types/util";
 
 export default function DocumentParser() {
@@ -30,21 +30,18 @@ export default function DocumentParser() {
     setIsLoading(true);
     setError("");
     setExtractedData("");
-    setProgress(
-      `Uploading ${files.length} file${files.length > 1 ? "s" : ""}...`,
-    );
+    setProgress(`Uploading ${files.length} file${files.length > 1 ? "s" : ""}...`);
 
     const interval = setInterval(() => {
-      setProgress((prev) =>
-        prev.endsWith("...") ? prev.slice(0, -3) : prev + ".",
-      );
+      setProgress((prev) => (prev.endsWith("...") ? prev.slice(0, -3) : prev + "."));
     }, 1000);
 
     try {
       const formData = new FormData();
       files.forEach((file) => formData.append("image", file));
+      formData.append("documentType", "document");
 
-      const result = await parseDocument(formData);
+      const result = await parseDocuments(formData);
       clearInterval(interval);
 
       if (isSuccess(result)) {
@@ -64,11 +61,11 @@ export default function DocumentParser() {
 
   return (
     <main className="min-h-screen p-8">
-      <h1 className="text-3xl font-bold mb-6">Document Parser</h1>
+      <h1 className="mb-6 text-3xl font-bold">Document Parser</h1>
 
       <form onSubmit={handleSubmit} className="mb-8 max-w-md">
         <div className="mb-4">
-          <label htmlFor="documents" className="block mb-2 font-medium">
+          <label htmlFor="documents" className="mb-2 block font-medium">
             Upload Document Pages
           </label>
           <input
@@ -77,12 +74,7 @@ export default function DocumentParser() {
             accept="image/*,.pdf"
             multiple
             onChange={handleFileChange}
-            className="block w-full text-sm text-gray-500
-              file:mr-4 file:py-2 file:px-4
-              file:rounded-md file:border-0
-              file:text-sm file:font-semibold
-              file:bg-blue-50 file:text-blue-700
-              hover:file:bg-blue-100"
+            className="block w-full text-sm text-gray-500 file:mr-4 file:rounded-md file:border-0 file:bg-blue-50 file:px-4 file:py-2 file:text-sm file:font-semibold file:text-blue-700 hover:file:bg-blue-100"
             required
           />
         </div>
@@ -90,7 +82,7 @@ export default function DocumentParser() {
         {files.length > 0 && (
           <div className="mb-4">
             <h2 className="font-semibold">Selected Files:</h2>
-            <ul className="list-disc list-inside">
+            <ul className="list-inside list-disc">
               {files.map((file) => (
                 <li key={file.name}>{file.name}</li>
               ))}
@@ -101,28 +93,20 @@ export default function DocumentParser() {
         <button
           type="submit"
           disabled={isLoading}
-          className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:bg-blue-300"
+          className="rounded-md bg-blue-600 px-4 py-2 text-white hover:bg-blue-700 disabled:bg-blue-300"
         >
           {isLoading ? "Processing..." : "Parse Document"}
         </button>
       </form>
 
-      {progress && (
-        <div className="mb-4 p-3 bg-blue-50 text-blue-700 rounded-md">
-          {progress}
-        </div>
-      )}
+      {progress && <div className="mb-4 rounded-md bg-blue-50 p-3 text-blue-700">{progress}</div>}
 
-      {error && (
-        <div className="mb-4 p-3 bg-red-100 text-red-700 rounded-md">
-          {error}
-        </div>
-      )}
+      {error && <div className="mb-4 rounded-md bg-red-100 p-3 text-red-700">{error}</div>}
 
       {extractedData && (
         <div className="mt-6">
-          <h2 className="text-xl font-bold mb-3">Extracted Data</h2>
-          <div className="p-4 bg-gray-50 rounded-md">
+          <h2 className="mb-3 text-xl font-bold">Extracted Data</h2>
+          <div className="bg-black-50 rounded-md p-4">
             <pre className="whitespace-pre-wrap">{extractedData}</pre>
           </div>
         </div>

@@ -2,8 +2,8 @@
 
 import { GoogleGenAI, createPartFromUri } from "@google/genai";
 import { ContentListUnion } from "@google/genai/node";
-import { randomUUID } from "crypto";
-import { Result, ok, err } from "../types/util";
+import { randomUUID, UUID } from "crypto";
+import { Result, ok, err, UploadInfo, flatten } from "../types/util";
 
 enum FileState {
   PROCESSING = "PROCESSING",
@@ -58,13 +58,14 @@ const PROMPTS: Record<string, string> = {
     If any fields are missing or unclear, use null.
   `,
   document: `
-    You are given one or more images of German-language doctor’s notes (handwritten or typed).
+    You are given one or more images of German-language doctor’s notes as text.
     Your task is to extract all relevant medical information and output it as a structured JSON object following the exact schema below.
-    The notes may span multiple pages or documents; in that case, treat each page/document separately.
+    Try to merge the different pages separated by ----- into one coherent document.
+    The date is of utmost importance and usually located at the top of the page.
     Always output strict JSON with no additional text or explanation—only the JSON structure shown.
     ## JSON Schema and Fields
     {
-      "date": "string | null (format: YYYY-MM-DD)",
+      "date": "YYYY-MM-DD",
       "patient": {
         "name": "string | null",
         "birth_date": "string | null",
@@ -102,7 +103,13 @@ const PROMPTS: Record<string, string> = {
           "findings": "string | null"
         }
       ],
-      "medications": ["string"],
+      "medications": [
+        {
+          name: "string"
+          dosis: "string | null",
+          frequency: "string | null",
+        }
+      ],
       "discharge_notes": "string | null"
     }
     All fields must be present. If a particular piece of information is missing or cannot be determined, use null for string or number fields, and use an empty array ([]) for list fields.
@@ -111,12 +118,13 @@ const PROMPTS: Record<string, string> = {
     For the procedures array, each entry must be an object with keys "name", "date", "indication", and "findings". Fill each with the relevant text (or null if not available). If no procedures are listed, use an empty array.
     Keep the field names exactly as shown (in English).
     ## Output Requirements and Validation
-    Strict JSON only: Your final answer must be valid JSON following the schema. Do not include any Markdown, bullet points, or explanatory text in the output. No comments or extra fields.
+    Strict JSON only: Your final answer must be valid JSON following the schema. Do NOT include any Markdown, bullet points, or explanatory text in the output. No comments or extra fields. The Output needs to be a valid JSON object.
     Ensure all keys are enclosed in double quotes and strings are properly quoted. Do not include trailing commas.
     Include every field from the schema. For example, even if no temperature is listed, output "temperature_c": null under vitals.
     Be conservative with uncertain information. If a field cannot be reliably read or is missing, use null (or an empty list for list fields) rather than guessing.
   `,
   raw: "Extract all visible text into one string.",
+  extractText: "Extract all visible text into one string",
 };
 
 const MODEL = "gemini-2.0-flash";
@@ -126,48 +134,114 @@ const ai = new GoogleGenAI({
   apiKey: process.env.GEMINI_API_KEY,
 });
 
-export const parseDocument = async (
-  formData: FormData,
-): Promise<Result<string, string>> => {
-  // Grab _all_ blobs under the “image” key
-  const documentType = formData.get("documentType") as string;
-  const blobs = formData.getAll("image") as Blob[];
-  if (blobs.length === 0) {
+async function sleep(ms: number) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+const uploadAndFetch = async (
+  blob: Blob,
+  id: UUID,
+  idx: number,
+): Promise<Result<UploadInfo, string>> => {
+  const file = await ai.files.upload({
+    file: blob,
+    config: { displayName: `avi-doc-${id}-${idx}` },
+  });
+
+  if (!file || !file.name) {
+    return err("Failed to Upload File");
+  }
+
+  // Poll for completion
+  let info;
+  do {
+    info = await ai.files.get({ name: file.name });
+    if (info.state === FileState.PROCESSING) {
+      await sleep(RETRY_TIMEOUT);
+    }
+  } while (info.state === FileState.PROCESSING);
+
+  // Handle errors
+  if (info.state === FileState.FAILED) {
+    throw new Error(`Upload failed for ${file.name}`);
+  }
+  if (!info.uri || !info.mimeType) {
+    throw new Error(`Missing URI or MIME type for ${file.name}`);
+  }
+
+  return ok({ uri: info.uri, mimeType: info.mimeType });
+};
+
+export const uploadFiles = async (blobs: Blob[]): Promise<Result<UploadInfo[], string>> => {
+  if (!blobs.length) {
     return err("No files uploaded");
   }
 
-  // Upload & poll each one
-  type UploadInfo = { uri: string; mimeType: string };
-  const uploadedFiles: UploadInfo[] = [];
+  try {
+    const id = randomUUID();
+    // Start all uploads and polling in parallel
+    const uploadPromises = blobs.map((blob, idx) => uploadAndFetch(blob, id, idx));
 
-  for (let i = 0; i < blobs.length; i++) {
-    const blob = blobs[i];
-    const file = await ai.files.upload({
-      file: blob,
-      config: { displayName: `avi-doc-${randomUUID()}-${i}` },
-    });
+    // Wait for all to finish
+    const uploadedFiles = await Promise.all(uploadPromises);
 
-    // Poll until processing is done
-    let info = await ai.files.get({ name: file.name as string });
-    while (info.state === FileState.PROCESSING) {
-      await new Promise((r) => setTimeout(r, RETRY_TIMEOUT));
-      info = await ai.files.get({ name: file.name as string });
-    }
+    return flatten(uploadedFiles);
+  } catch (error) {
+    // Short-circuit on first failure
+    return err(error.message);
+  }
+};
 
-    if (info.state === FileState.FAILED) {
-      return err(`Upload failed for ${file.name}`);
-    }
-    if (!info.uri || !info.mimeType) {
-      return err(`Missing URI or MIME type for ${file.name}`);
-    }
+const extractAndMerge = async (uploadInfos: UploadInfo[]): Promise<Result<string, string>> => {
+  const extractedTexts = await Promise.all(
+    uploadInfos.map((info) => {
+      const content: ContentListUnion = [
+        PROMPTS.extractText,
+        createPartFromUri(info.uri, info.mimeType),
+      ];
 
-    uploadedFiles.push({ uri: info.uri, mimeType: info.mimeType });
+      return ai.models.generateContent({
+        model: MODEL,
+        contents: content,
+      });
+    }),
+  );
+
+  // Check for errors
+  const errors = extractedTexts.filter((response) => !response?.text);
+  if (errors.length > 0) {
+    return err("Failed to extract text from some files");
   }
 
-  const content: ContentListUnion = [
-    PROMPTS[documentType] || PROMPTS.raw,
-    ...uploadedFiles.map((f) => createPartFromUri(f.uri, f.mimeType)),
-  ];
+  return ok(extractedTexts.map((response) => response.text).join("\n-----\n"));
+};
+
+export const extractTextFromDocuments = async (blobs: Blob[]): Promise<Result<string, string>> => {
+  const uploadedFiles = await uploadFiles(blobs);
+
+  if (uploadedFiles.error) {
+    return err(uploadedFiles.error);
+  }
+
+  const extractedTexts = await extractAndMerge(uploadedFiles.value!);
+
+  if (extractedTexts.error) {
+    return err(extractedTexts.error);
+  }
+
+  return ok(extractedTexts.value!);
+};
+
+export const parseDocuments = async (formData: FormData): Promise<Result<string, string>> => {
+  const blobs = formData.getAll("image") as Blob[];
+  const documentType = formData.get("documentType") as string;
+  const text = await extractTextFromDocuments(blobs);
+
+  if (text.error) {
+    return err(text.error);
+  }
+
+  const content: ContentListUnion = [PROMPTS[documentType] || PROMPTS.raw, text.value!];
 
   // Send it all off to Gemini
   const response = await ai.models.generateContent({
@@ -178,5 +252,6 @@ export const parseDocument = async (
   if (!response?.text) {
     return err("No response from Gemini");
   }
+
   return ok(response.text);
 };
