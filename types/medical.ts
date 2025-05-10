@@ -9,11 +9,7 @@ export interface MedicalDocument {
     weight_kg: number | null;
     bmi: number | null;
   };
-  vitals: {
-    blood_pressure: string | null;
-    heart_rate: number | null;
-    temperature_c: number | null;
-  };
+  vitals: Vitals,
   anamnesis: string | null;
   statusAtAdmission: string | null;
   diagnosis: string[];
@@ -23,25 +19,30 @@ export interface MedicalDocument {
     date: string | null;
     details: string | null;
   };
-  lab_parameters: string[];
-  procedures: {
-    name: string;
-    date: string | null;
-    indication: string | null;
-    findings: string | null;
-  }[];
-  planned_procedures: {
-    name: string;
-    date: string | null;
-    indication: string | null;
-  }[];
-  medications: {
-    name: string;
-    dosage: string | null;
-    frequency: string | null;
-    duration: string | null;
-  }[];
+  lab_parameters: LabParameter[];
+  procedures: Procedure[];
+  medications: Medication[];
   discharge_notes: string | null;
+}
+
+export interface LabParameter {
+  name: string;
+  quantity: number;
+  unit: string;
+}
+
+export interface Vitals {
+  blood_pressure: string | null;
+  heart_rate: number | null;
+  temperature_c: number | null;
+  respiratory_rate: number | null;
+}
+
+export interface Procedure {
+  name: string;
+  date: string | null;
+  indication: string | null;
+  findings: string | null;
 }
 
 export interface Medication {

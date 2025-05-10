@@ -13,9 +13,8 @@ enum FileState {
 
 const PROMPTS: Record<DocType, string> = {
   [DocType.VACCINEPASS]: `
-    You are a medical data assistant. Analyze the attached images of a German vaccination pass (Impfpass).
+    You are an expert OCR-and-data-extraction engine tasked with converting all printed and encoded fields from a German vaccine pass into a strict JSON format.
     ***IMPORTANT: EXTRACT VACCINATION NAME ONLY FROM THE INDIVIDUAL STICKERS.*** Do NOT use any printed headers, titles, or sheet information. Only use the content visible directly on each vaccination sticker (vaccine name).
-    Extract all vaccination entries and present them in valid JSON format.
 
     Please follow this structure:
 
@@ -49,12 +48,13 @@ const PROMPTS: Record<DocType, string> = {
       ]
     }
 
-    Please:
     - ***IMPORTANT:Include every dose as a separate entry. ONLY FROM STICKERS.***
     - Parse vaccine names from stamps/stickers or handwritten labels.
     - Include entries like yellow fever and COVID.
     - Translate German terms where helpful, but preserve names as-is (e.g., "Infanrix", "Comirnaty").
-    - Only output the JSON. No explanation or comments.
+    
+    Strict JSON only: Your final answer must be valid JSON following the schema. Do NOT include any Markdown, bullet points, or explanatory text in the output. No comments or extra fields. The output should be a string that contains valid JSON.
+    Ensure all keys are enclosed in double quotes and strings are properly quoted. Do not include trailing commas.
 
     If any fields are missing or unclear, use null.
   `,
@@ -81,6 +81,7 @@ const PROMPTS: Record<DocType, string> = {
         blood_pressure: string | null;
         heart_rate: number | null;
         temperature_c: number | null;
+        respiratory_rate: number | null;
       };
       anamnesis: string | null;
       statusAtAdmission: string | null;
@@ -91,17 +92,16 @@ const PROMPTS: Record<DocType, string> = {
         date: string | null;
         details: string | null;
       };
-      lab_parameters: string[];
+      lab_parameters: { 
+        name: string;
+        quantity: number;
+        unit: string;
+      }[];
       procedures: {
         name: string;
         date: string | null;
         indication: string | null;
         findings: string | null;
-      }[];
-      planned_procedures: {
-        name: string;
-        date: string | null;
-        indication: string | null;
       }[];
       medications: {
         name: string;
@@ -213,7 +213,7 @@ export const uploadFiles = async (blobs: Blob[]): Promise<Result<UploadInfo[], s
     const uploadedFiles = await Promise.all(uploadPromises);
 
     return flatten(uploadedFiles);
-  } catch (error) {
+  } catch (error: unknown) {
     // Short-circuit on first failure
     return err(error instanceof Error ? error.message : 'Unknown error occurred');
   }
@@ -263,13 +263,13 @@ export const parseDocuments = async <T>(formData: FormData): Promise<Result<T, s
   const blobs = formData.getAll("image") as Blob[];
   const documentType = formData.get("documentType") as DocType;
   const text = await extractTextFromDocuments(blobs);
-
   if (text.error) {
+    console.log(documentType);
     return err(text.error);
   }
 
   const content: ContentListUnion = [PROMPTS[documentType] || PROMPTS[DocType.RAW], text.value!];
-
+  
   // Send it all off to Gemini
   const response = await ai.models.generateContent({
     model: MODEL,
