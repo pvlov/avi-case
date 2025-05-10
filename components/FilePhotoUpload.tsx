@@ -1,8 +1,8 @@
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { Camera, CameraIcon, File, Upload } from "lucide-react";
 import { useState, useRef, useCallback, useEffect } from "react";
 import Webcam from "react-webcam";
-import { Input } from "./ui/input";
-import { Button } from "./ui/button";
 
 interface FilePhotoUploadProps {
   onFilesChange?: (files: File[]) => void;
