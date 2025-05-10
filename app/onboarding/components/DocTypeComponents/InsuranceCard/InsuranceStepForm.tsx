@@ -13,7 +13,8 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { InsuranceCardData } from "@/types/medical";
+import { InsuranceCard } from "@/types/medical";
+import * as React from "react";
 
 // Create a schema for form validation
 const formSchema = z.object({
@@ -35,13 +36,9 @@ const formSchema = z.object({
   dateOfBirth: z.string().min(1, {
     message: "Date of birth is required.",
   }),
-  validFrom: z.string().min(1, {
-    message: "Valid from date is required.",
-  }),
-  validTo: z.string().min(1, {
+  validUntil: z.string().min(1, {
     message: "Valid to date is required.",
   }),
-  cardSerialNumber: z.string(),
   cardNumber: z.string().min(1, {
     message: "Card number is required.",
   }),
@@ -50,7 +47,7 @@ const formSchema = z.object({
 type FormValues = z.infer<typeof formSchema>;
 
 interface InsuranceStepFormProps {
-  onSubmit?: (data: InsuranceCardData) => void;
+  onSubmit?: (data: InsuranceCard) => void;
 }
 
 export function InsuranceStepForm({ onSubmit }: InsuranceStepFormProps) {
@@ -63,19 +60,16 @@ export function InsuranceStepForm({ onSubmit }: InsuranceStepFormProps) {
       givenName: "",
       familyName: "",
       dateOfBirth: "",
-      validFrom: "",
-      validTo: "",
-      cardSerialNumber: "",
+      validUntil: "",
       cardNumber: "",
     },
   });
 
   function handleSubmit(values: FormValues) {
-    const data: InsuranceCardData = {
+    const data: InsuranceCard = {
       ...values,
       dateOfBirth: new Date(values.dateOfBirth),
-      validFrom: new Date(values.validFrom),
-      validTo: new Date(values.validTo),
+      validUntil: new Date(values.validUntil),
     };
 
     if (onSubmit) {
@@ -153,20 +147,6 @@ export function InsuranceStepForm({ onSubmit }: InsuranceStepFormProps) {
                 </FormItem>
               )}
             />
-
-            <FormField
-              control={form.control}
-              name="cardSerialNumber"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Card Serial Number</FormLabel>
-                  <FormControl>
-                    <Input placeholder="e.g. SN12345" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
           </div>
         </div>
 
@@ -224,24 +204,10 @@ export function InsuranceStepForm({ onSubmit }: InsuranceStepFormProps) {
 
             <FormField
               control={form.control}
-              name="validFrom"
+              name="validUntil"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Valid From</FormLabel>
-                  <FormControl>
-                    <Input type="date" placeholder="YYYY-MM-DD" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name="validTo"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Valid To</FormLabel>
+                  <FormLabel>Valid Until</FormLabel>
                   <FormControl>
                     <Input type="date" placeholder="YYYY-MM-DD" {...field} />
                   </FormControl>
@@ -252,9 +218,9 @@ export function InsuranceStepForm({ onSubmit }: InsuranceStepFormProps) {
           </div>
         </div>
 
-        <div className="flex justify-end">
-          <Button type="submit">Save Insurance Information</Button>
-        </div>
+        <Button type="submit" className="flex justify-end" onClick={handleSubmit}>
+          Submit
+        </Button>
       </form>
     </Form>
   );

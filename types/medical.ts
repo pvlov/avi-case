@@ -53,17 +53,15 @@ export interface Medication {
   documentId?: string;
 }
 
-export interface InsuranceCardData {
-  insurerName: string;
-  insurerId: string;
-  memberId: string;
+export interface InsuranceCard {
   givenName: string;
   familyName: string;
   dateOfBirth: Date;
-  validFrom: Date;
-  validTo: Date;
-  cardSerialNumber: string;
+  personalNumber: string;
+  insuranceNumber: string;
+  insuranceName: string;
   cardNumber: string;
+  validUntil: Date;
 }
 
 export enum DocType {

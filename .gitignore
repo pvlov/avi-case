@@ -51,3 +51,6 @@ bun-debug.log*
 
 # env
 .env
+
+# idea
+.idea/

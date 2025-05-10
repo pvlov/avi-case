@@ -123,19 +123,17 @@ const PROMPTS: Record<DocType, string> = {
     Include every field from the schema. For example, even if no temperature is listed, output "temperature_c": null under vitals.
     Be conservative with uncertain information. If a field cannot be reliably read or is missing, use null (or an empty list for list fields) rather than guessing.
   `,
-  [DocType.INSURANCECARD]: `You are an expert OCR-and-data-extraction engine tasked with converting all printed and encoded fields from a German electronic Gesundheitskarte (eGK) into a strict   JSON format. Follow these rules exactly:
+  [DocType.INSURANCECARD]: `You are an expert OCR-and-data-extraction engine tasked with converting all printed and encoded fields from a German electronic Gesundheitskarte (eGK) into a strict JSON format. Follow these rules exactly:
     1. *Schema* – always output a single JSON object with these keys (in this order):
       {
-        "insurerName": string,        // full official name of the Krankenkasse
-        "insurerId": string,          // Kassen­identifikationsnummer (numeric string)
-        "memberId": string,           // Versicherungsnummer on the card
-        "givenName": string,          // Vorname
-        "familyName": string,         // Nachname
-        "dateOfBirth": "YYYY-MM-DD",  // ISO-8601 date
-        "validFrom": "YYYY-MM",       // month and year of card validity start
-        "validTo": "YYYY-MM",         // month and year of card validity end
-        "cardSerialNumber": string,   // Chip-Seriennummer (auf der Karte)
-        "cardNumber": string,         // Kartennummer (aufgedruckt)
+        givenName: string; // Name
+        familyName: string; // Vorname
+        dateOfBirth: Date; // Geburtsdatum
+        personalNumber: string; // Persönliche Kennnummer
+        insuranceNumber: string; // Kennnummer des Trägers
+        insuranceName: string; // Name der Versicherung
+        cardNumber: string; // Kennnummer der Karte
+        validUntil: Date; // Ablaufdatum
       }
     2. *Output* – emit *only* valid JSON (no explanations, no markdown fences).
     3. *Missing or unreadable data* – if a field is missing or illegible in the OCR/text/codes, set its value to *null. Do **not* guess or invent values.
