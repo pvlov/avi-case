@@ -1,8 +1,8 @@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useState } from "react";
 import { FilePhotoUpload } from "@/components/FilePhotoUpload";
-import { InsuranceStepForm } from "./InsuranceStepForm";
 import { InsuranceCardData } from "@/types/medical";
+import { InsuranceStepForm } from "./InsuranceStepForm";
 
 export default function InsuranceStep() {
   const [files, setFiles] = useState<File[]>([]);
