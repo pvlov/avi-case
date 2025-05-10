@@ -11,7 +11,9 @@
   },
   "dependencies": {
     "@google/genai": "^0.13.0",
+    "@hookform/resolvers": "^5.0.1",
     "@radix-ui/react-dialog": "^1.1.13",
+    "@radix-ui/react-label": "^2.1.6",
     "@radix-ui/react-navigation-menu": "^1.2.12",
     "@radix-ui/react-popover": "^1.1.13",
     "@radix-ui/react-progress": "^1.1.6",
@@ -19,6 +21,7 @@
     "@radix-ui/react-tabs": "^1.1.11",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
+    "date-fns": "^4.1.0",
     "lucide": "^0.509.0",
     "lucide-react": "^0.509.0",
     "next": "15.3.2",
@@ -27,10 +30,13 @@
     "prettier-plugin-tailwindcss": "^0.6.11",
     "prisma": "^6.7.0",
     "react": "^19.0.0",
+    "react-day-picker": "8.10.1",
     "react-dom": "^19.0.0",
+    "react-hook-form": "^7.56.3",
     "react-webcam": "^7.2.0",
     "tailwind-merge": "^3.2.0",
-    "tailwind-variants": "^1.0.0"
+    "tailwind-variants": "^1.0.0",
+    "zod": "^3.24.4"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",

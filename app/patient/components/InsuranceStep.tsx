@@ -1,12 +1,20 @@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useState } from "react";
 import { FilePhotoUpload } from "@/components/FilePhotoUpload";
+import { InsuranceStepForm } from "./InsuranceStepForm";
+import { InsuranceCardData } from "@/types/medical";
 
 export default function InsuranceStep() {
   const [files, setFiles] = useState<File[]>([]);
+  const [insuranceData, setInsuranceData] = useState<InsuranceCardData | null>(null);
 
   const handleFilesChange = (newFiles: File[]) => {
     setFiles(newFiles);
+  };
+
+  const handleFormSubmit = (data: InsuranceCardData) => {
+    setInsuranceData(data);
+    console.log("Insurance data submitted:", data);
   };
 
   return (
@@ -22,7 +30,9 @@ export default function InsuranceStep() {
           subtitle="PDF, JPG, or PNG (max 10 files)"
         />
       </TabsContent>
-      <TabsContent value="manual"></TabsContent>
+      <TabsContent value="manual" className="p-4">
+        <InsuranceStepForm onSubmit={handleFormSubmit} />
+      </TabsContent>
     </Tabs>
   );
 }

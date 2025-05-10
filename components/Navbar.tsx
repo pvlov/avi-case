@@ -39,7 +39,7 @@ export function Navbar() {
               )}
               asChild
             >
-              <Link href={""}>n/avi</Link>
+              <Link href="/patient">Patient</Link>
             </NavigationMenuLink>
           </NavigationMenuItem>
           <NavigationMenuItem>
