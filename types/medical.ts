@@ -71,6 +71,7 @@ export enum DocType {
   INSURANCECARD = "insurancecard",
   DOCUMENT = "document",
   VACCINEPASS = "vaccinepass",
+  REASONFORVISIT = "reasonforvisit",
 }
 
 // Individual vaccination entry interface

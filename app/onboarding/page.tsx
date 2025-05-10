@@ -12,6 +12,7 @@ import MedicalHistoryStep from "./components/DocTypeComponents/MedicalHistorySte
 import VaccinationStep from "./components/DocTypeComponents/Vaccinations/VaccinationStep";
 import PrescriptionStep from "./components/DocTypeComponents/PrescriptionStep";
 import { DocType } from "@/types/medical";
+import ReasonForVisitStep from "@/app/onboarding/components/DocTypeComponents/ReasonForVisitStep";
 
 // Define step configuration with DocType as the single source of truth
 interface OnboardingStep extends Step {
@@ -24,6 +25,7 @@ const ComponentFactory = {
   [DocType.VACCINEPASS]: VaccinationStep,
   [DocType.DOCUMENT]: MedicalHistoryStep,
   [DocType.RAW]: PrescriptionStep,
+  [DocType.REASONFORVISIT]: ReasonForVisitStep, // Placeholder for ReasonForVisitStep
 
   // Get the component for a specific docType
   getComponent(docType: DocType) {
@@ -36,29 +38,36 @@ const ComponentFactory = {
 const steps: OnboardingStep[] = [
   {
     stepNum: 1,
+    label: "Reason for Visit",
+    description: "Upload your reason for visit and any relevant symptoms",
+    docType: DocType.REASONFORVISIT,
+  },
+  {
+    stepNum: 2,
     label: "Insurance Information",
     description: "Upload your insurance details and coverage information",
     docType: DocType.INSURANCECARD,
   },
   {
-    stepNum: 2,
+    stepNum: 3,
     label: "Vaccination Records",
     description: "Upload your vaccination records, including any previous vaccinations or boosters",
     docType: DocType.VACCINEPASS,
   },
   {
-    stepNum: 3,
+    stepNum: 4,
     label: "Medical History",
     description: "Upload your medical history, including any previous illnesses or conditions",
     docType: DocType.DOCUMENT,
   },
   {
-    stepNum: 4,
+    stepNum: 5,
     label: "Prescription Records",
     description:
       "Upload your prescription records, including any previous medications or treatments",
     docType: DocType.RAW,
   },
+
 ];
 
 export default function Onboarding() {
