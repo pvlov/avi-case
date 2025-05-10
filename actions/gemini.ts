@@ -156,7 +156,9 @@ const PROMPTS: Record<DocType, string> = {
 };
 
 const MODEL = "gemini-2.0-flash";
-const RETRY_TIMEOUT = 5000;
+const RETRY_TIMEOUT = 1000;
+const RETRY_AMOUNT = 3;
+
 
 const ai = new GoogleGenAI({
   apiKey: process.env.GEMINI_API_KEY,
@@ -277,49 +279,69 @@ export const parseDocuments = async <T>(formData: FormData): Promise<Result<T, s
 
   const content: ContentListUnion = [PROMPTS[documentType] || PROMPTS[DocType.RAW], text.value!];
 
-  // Send it all off to Gemini
-  const response = await ai.models.generateContent({
-    model: MODEL,
-    contents: content,
-  });
+  // Retry logic for JSON extraction
+  let retries = 0;
+  let parsedData = null;
+  let lastError = "";
 
-  if (!response?.text) {
-    return err("No response from Gemini");
-  }
+  while (retries < RETRY_AMOUNT) {
+    try {
+      // Send it all off to Gemini
+      const response = await ai.models.generateContent({
+        model: MODEL,
+        contents: content,
+      });
 
-  try {
-    let parsedData = JSON.parse(stripFirstAndLastLine(response.text)) as any;
-
-    // Transform date strings to Date objects based on document type
-    if (documentType === DocType.VACCINEPASS) {
-      if (parsedData.vaccinations && Array.isArray(parsedData.vaccinations)) {
-        // Convert date strings to Date objects in vaccinations array
-        parsedData.vaccinations = parsedData.vaccinations.map((vaccination: any) => ({
-          ...vaccination,
-          date: vaccination.date ? new Date(vaccination.date) : null,
-        }));
+      if (!response?.text) {
+        retries++;
+        if (retries >= RETRY_AMOUNT) {
+          return err("No response from Gemini after multiple attempts");
+        }
+        await sleep(RETRY_TIMEOUT);
+        continue;
       }
 
-      if (parsedData.special_tests && Array.isArray(parsedData.special_tests)) {
-        // Convert date strings to Date objects in special_tests array
-        parsedData.special_tests = parsedData.special_tests.map((test: any) => ({
-          ...test,
-          date: test.date ? new Date(test.date) : null,
-        }));
+      parsedData = JSON.parse(stripFirstAndLastLine(response.text)) as any;
+
+      // Successfully parsed JSON, proceed with transformations
+
+      // Transform date strings to Date objects based on document type
+      if (documentType === DocType.VACCINEPASS) {
+        if (parsedData.vaccinations && Array.isArray(parsedData.vaccinations)) {
+          // Convert date strings to Date objects in vaccinations array
+          parsedData.vaccinations = parsedData.vaccinations.map((vaccination: any) => ({
+            ...vaccination,
+            date: vaccination.date ? new Date(vaccination.date) : null,
+          }));
+        }
+
+        if (parsedData.special_tests && Array.isArray(parsedData.special_tests)) {
+          // Convert date strings to Date objects in special_tests array
+          parsedData.special_tests = parsedData.special_tests.map((test: any) => ({
+            ...test,
+            date: test.date ? new Date(test.date) : null,
+          }));
+        }
+      } else if (documentType === DocType.INSURANCECARD) {
+        // Handle insurance card dates
+        if (parsedData.dateOfBirth) {
+          parsedData.dateOfBirth = new Date(parsedData.dateOfBirth);
+        }
+        if (parsedData.validUntil) {
+          parsedData.validUntil = new Date(parsedData.validUntil);
+        }
       }
-    } else if (documentType === DocType.INSURANCECARD) {
-      // Handle insurance card dates
-      if (parsedData.dateOfBirth) {
-        parsedData.dateOfBirth = new Date(parsedData.dateOfBirth);
-      }
-      if (parsedData.validUntil) {
-        parsedData.validUntil = new Date(parsedData.validUntil);
-      }
+
+      // Successfully parsed and transformed data
+      return ok(parsedData as T);
+
+    } catch (e) {
+      lastError = String(e);
+      console.log(`Attempt ${retries + 1}/${RETRY_AMOUNT} failed: ${lastError}`);
+      retries++;
     }
-
-    return ok(parsedData as T);
-  } catch (e) {
-    console.log(response.text);
-    return err("Invalid JSON response from Gemini: " + e);
   }
+
+  // If we get here, all retries failed
+  return err(`Failed to parse JSON after ${RETRY_AMOUNT} attempts. Last error: ${lastError}`);
 };
