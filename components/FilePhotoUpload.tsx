@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Camera, CameraIcon, File, Upload } from "lucide-react";
+import { Camera, CameraIcon, File, Upload, X } from "lucide-react";
 import { useState, useRef, useCallback, useEffect } from "react";
 import Webcam from "react-webcam";
 
@@ -49,11 +49,11 @@ export function FilePhotoUpload({
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newFiles = Array.from(e.target.files || []);
-    if (newFiles.length > maxFiles) {
+    if (files.length + newFiles.length > maxFiles) {
       alert(`Maximum ${maxFiles} files allowed`);
       return;
     }
-    setFiles(newFiles);
+    setFiles((prevFiles) => [...prevFiles, ...newFiles]);
   };
 
   const startCamera = () => {
@@ -79,8 +79,10 @@ export function FilePhotoUpload({
     fetch(imageSrc)
       .then((res) => res.blob())
       .then((blob) => {
-        const file = new Blob([blob], { type: "image/jpeg" });
-        setFiles((prevFiles) => [...prevFiles, file as unknown as File]);
+        const fileName = `photo_${new Date().toISOString()}.jpeg`;
+        // @ts-expect-error idc
+        const file = new File([blob], fileName, { type: "image/jpeg" });
+        setFiles((prevFiles) => [...prevFiles, file]);
         stopCamera();
       })
       .catch((err) => {
@@ -88,6 +90,10 @@ export function FilePhotoUpload({
         setCameraError("Failed to capture photo");
       });
   }, []);
+
+  const removeFile = (index: number) => {
+    setFiles((prevFiles) => prevFiles.filter((_, i) => i !== index));
+  };
 
   const videoConstraints = {
     facingMode,
@@ -125,8 +131,30 @@ export function FilePhotoUpload({
               Take Photo
             </Button>
           </div>
+
+          {/* File list */}
           {files.length > 0 && (
-            <p className="text-muted-foreground text-sm">{files.length} files selected</p>
+            <div className="mt-4 w-full space-y-2">
+              {files.map((file, index) => (
+                <div
+                  key={index}
+                  className="border-border bg-muted/20 flex items-center justify-between rounded-md border p-2"
+                >
+                  <div className="flex items-center overflow-hidden">
+                    <File className="mr-2 h-4 w-4 flex-shrink-0" />
+                    <span className="truncate text-sm">{file.name}</span>
+                  </div>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => removeFile(index)}
+                    className="h-6 w-6 p-0"
+                  >
+                    <X className="h-4 w-4" />
+                  </Button>
+                </div>
+              ))}
+            </div>
           )}
         </>
       ) : (

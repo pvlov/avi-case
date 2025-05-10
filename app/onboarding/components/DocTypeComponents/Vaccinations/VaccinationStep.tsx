@@ -11,6 +11,7 @@ import { parseDocuments } from "@/actions/gemini";
 import { Spinner } from "@/components/ui/spinner";
 import { useFormWithStore } from "@/lib/useFormWithStore";
 import { useMedicalStore } from "@/lib/store";
+import { Card, CardContent } from "@/components/ui/card";
 import { VaccinationTable } from "./VaccinationTable";
 import { VaccinationEditDialog } from "./VaccinationEditDialog";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -76,6 +77,10 @@ export default function VaccinationStep() {
 
   const handleFilesChange = (newFiles: File[]) => {
     setFiles(newFiles);
+
+    if (newFiles.length === 0) {
+      setSuccess(false);
+    }
   };
 
   const handleFileUploadSubmit = async () => {
@@ -150,18 +155,6 @@ export default function VaccinationStep() {
     allergies_or_medical_notes: [],
   });
 
-  const submitElements = isLoading ? (
-    <div className="flex items-center justify-center">
-      <Spinner className="mt-12 mb-12 size-16" />
-    </div>
-  ) : (
-    <FilePhotoUpload
-      onFilesChange={handleFilesChange}
-      title=""
-      subtitle="PDF, JPG, or PNG (max 10 files)"
-    />
-  );
-
   return (
     <>
       <Tabs
@@ -180,29 +173,30 @@ export default function VaccinationStep() {
           <div className="bg-destructive/20 text-destructive mt-2 rounded-md p-3">{error}</div>
         )}
 
-        <TabsContent value="upload" className="flex flex-col gap-4">
-          {success || vaccinationData ? (
+        <TabsContent value="upload" className="flex flex-col">
+          {isLoading ? (
             <div className="flex items-center justify-center">
-              <CircleCheck className="mt-12 mb-12 size-16" />
+              <Spinner className="mt-12 mb-12 size-16" />
             </div>
           ) : (
-            submitElements
+            <FilePhotoUpload
+              onFilesChange={handleFilesChange}
+              title=""
+              subtitle="PDF, JPG, or PNG (max 10 files)"
+            />
           )}
-          {!success && !vaccinationData && (
-            <div className="flex justify-end">
-              <Button
-                onClick={handleFileUploadSubmit}
-                disabled={isLoading || isSubmitting || files.length === 0}
-              >
-                Submit
-              </Button>
-            </div>
-          )}
+          <Button
+            className="mt-4 w-full"
+            onClick={handleFileUploadSubmit}
+            disabled={isLoading || isSubmitting || files.length === 0}
+          >
+            Submit
+          </Button>
         </TabsContent>
         <TabsContent value="manual">
-          <ScrollArea className="h-[400px] w-full border rounded-md p-4">
-            <VaccinationTable 
-              data={vaccinationData || getEmptyVaccinationData()} 
+          <ScrollArea className="h-[400px] w-full rounded-md border p-4">
+            <VaccinationTable
+              data={vaccinationData || getEmptyVaccinationData()}
               onEditVaccination={handleEditVaccination}
               onAddVaccination={handleAddVaccination}
             />

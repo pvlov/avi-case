@@ -1,6 +1,8 @@
 export interface MedicalDocument {
+  generatedTitle?: string;
   dateIssued: string | null;
   doctorName: string | null;
+  generatedTitle: string;
   patient: {
     name: string | null;
     birth_date: string | null;
@@ -9,7 +11,7 @@ export interface MedicalDocument {
     weight_kg: number | null;
     bmi: number | null;
   };
-  vitals: Vitals,
+  vitals: Vitals;
   anamnesis: string | null;
   statusAtAdmission: string | null;
   diagnosis: string[];
@@ -20,8 +22,23 @@ export interface MedicalDocument {
     details: string | null;
   };
   lab_parameters: LabParameter[];
-  procedures: Procedure[];
-  medications: Medication[];
+  procedures: {
+    name: string;
+    date: string | null;
+    indication: string | null;
+    findings: string | null;
+  }[];
+  planned_procedures?: {
+    name: string;
+    date: string | null;
+    indication: string | null;
+  }[];
+  medications: {
+    name: string;
+    dosage: string | null;
+    frequency: string | null;
+    duration: string | null;
+  }[];
   discharge_notes: string | null;
 }
 
@@ -43,6 +60,7 @@ export interface Procedure {
   date: string | null;
   indication: string | null;
   findings: string | null;
+  documentId?: string;
 }
 
 export interface Medication {
@@ -70,38 +88,35 @@ export enum DocType {
   INSURANCECARD = "insurancecard",
   DOCUMENT = "document",
   VACCINEPASS = "vaccinepass",
+  REASONFORVISIT = "reasonforvisit",
 }
 
 // Individual vaccination entry interface
 export interface VaccinationEntry {
-  vaccine: string;         // e.g. MMR, Tetanus, COVID-19
+  vaccine: string; // e.g. MMR, Tetanus, COVID-19
   date: Date;
-  trade_name?: string;     // e.g. Infanrix, Comirnaty
-  batch_number?: string;   // from the sticker (Ch.-B. or similar)
-  doctor?: string;         // doctor or practice name
-  location?: string;       // practice, city, stamp
-  notes?: string;          // optional handwritten comments, remarks, booster info
+  trade_name?: string; // e.g. Infanrix, Comirnaty
+  batch_number?: string; // from the sticker (Ch.-B. or similar)
+  doctor?: string; // doctor or practice name
+  location?: string; // practice, city, stamp
+  notes?: string; // optional handwritten comments, remarks, booster info
 }
 
 // Special test interface for TB, Yellow Fever, etc.
 export interface SpecialTest {
-  type: string;            // "Tuberculosis", "Yellow Fever", "Hepatitis B", etc.
+  type: string; // "Tuberculosis", "Yellow Fever", "Hepatitis B", etc.
   date: Date;
   reaction?: string;
   issuer?: string;
 }
 
-// Complete vaccination pass document interface
 export interface VaccinationPass {
   person: {
-    name: string | null;
-    date_of_birth: string | null;
+    name: string;
+    date_of_birth: string;
     gender: string | null;
   };
-  vaccinations: VaccinationEntry[];
+  vaccinations: Vaccination[];
   special_tests: SpecialTest[];
   allergies_or_medical_notes: string[];
 }
-
-// For backward compatibility - individual vaccination entry
-export interface Vaccination extends VaccinationEntry {}

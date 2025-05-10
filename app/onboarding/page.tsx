@@ -12,6 +12,7 @@ import InsuranceStep from "./components/DocTypeComponents/InsuranceCard/Insuranc
 import MedicalDocumentStep from "./components/DocTypeComponents/MedicalDocument/MedicalDocumentStep";
 import VaccinationStep from "./components/DocTypeComponents/Vaccinations/VaccinationStep";
 import { DocType } from "@/types/medical";
+import ReasonForVisitStep from "@/app/onboarding/components/DocTypeComponents/ReasonForVisitStep";
 
 // Define step configuration with DocType as the single source of truth
 interface OnboardingStep extends Step {
@@ -30,6 +31,8 @@ const ComponentFactory: ComponentMap = {
   [DocType.INSURANCECARD]: InsuranceStep,
   [DocType.VACCINEPASS]: VaccinationStep,
   [DocType.DOCUMENT]: MedicalDocumentStep,
+  [DocType.RAW]: PrescriptionStep,
+  [DocType.REASONFORVISIT]: ReasonForVisitStep, // Placeholder for ReasonForVisitStep
 
   // Get the component for a specific docType
   getComponent(docType: DocType): React.ReactNode {
@@ -42,18 +45,24 @@ const ComponentFactory: ComponentMap = {
 const steps: OnboardingStep[] = [
   {
     stepNum: 1,
+    label: "Reason for Visit",
+    description: "Upload your reason for visit and any relevant symptoms",
+    docType: DocType.REASONFORVISIT,
+  },
+  {
+    stepNum: 2,
     label: "Insurance Information",
     description: "Upload your insurance details and coverage information.",
     docType: DocType.INSURANCECARD,
   },
   {
-    stepNum: 2,
+    stepNum: 3,
     label: "Vaccination Records",
     description: "Upload your vaccination records, including any previous vaccinations or boosters.",
     docType: DocType.VACCINEPASS,
   },
   {
-    stepNum: 3,
+    stepNum: 4,
     label: "Medical Documents",
     description: "Upload your medical documents, including any previous illnesses, medications, conditions and treatments.",
     docType: DocType.DOCUMENT,

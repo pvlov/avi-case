@@ -17,6 +17,7 @@ import { VaccinationPass } from "@/types/medical";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Save } from "lucide-react";
+import { Calendar } from "@/components/ui/calendar";
 
 // Create a schema for a single vaccination entry (for form input)
 const vaccinationEntrySchema = z.object({
@@ -73,11 +74,12 @@ const getFormDefaultValues = (data?: VaccinationPass, vaccinationIndex?: number)
   return {
     vaccination: {
       vaccine: vaccination.vaccine,
-      date: vaccination.date instanceof Date
-        ? vaccination.date.toISOString().split("T")[0]
-        : typeof vaccination.date === "string"
-          ? vaccination.date
-          : "",
+      date:
+        vaccination.date instanceof Date
+          ? vaccination.date.toISOString().split("T")[0]
+          : typeof vaccination.date === "string"
+            ? vaccination.date
+            : "",
       trade_name: vaccination.trade_name || "",
       batch_number: vaccination.batch_number || "",
       doctor: vaccination.doctor || "",
@@ -110,24 +112,28 @@ export function VaccinationStepForm({
 
   const handleSubmit: SubmitHandler<FormSchema> = (values) => {
     // If editing, update the existing vaccination
+    const formattedDate = values.vaccination.date
+      ? new Date(values.vaccination.date).toISOString().split("T")[0]
+      : "";
+
     if (isEdit && defaultValues && vaccinationIndex !== undefined) {
       const updatedVaccinations = [...defaultValues.vaccinations];
       updatedVaccinations[vaccinationIndex] = {
         ...values.vaccination,
-        date: new Date(values.vaccination.date),
+        date: formattedDate,
       };
-      
+
       const data: VaccinationPass = {
         person: defaultValues.person,
         vaccinations: updatedVaccinations,
         special_tests: defaultValues.special_tests,
         allergies_or_medical_notes: defaultValues.allergies_or_medical_notes,
       };
-      
+
       if (onSubmit) {
         onSubmit(data);
       }
-    } 
+    }
     // If adding a new vaccination
     else if (defaultValues) {
       // Add the new vaccination to existing ones
@@ -138,16 +144,16 @@ export function VaccinationStepForm({
           {
             ...values.vaccination,
             date: new Date(values.vaccination.date),
-          }
+          },
         ],
         special_tests: defaultValues.special_tests,
         allergies_or_medical_notes: defaultValues.allergies_or_medical_notes,
       };
-      
+
       if (onSubmit) {
         onSubmit(data);
       }
-    } 
+    }
     // If this is the first vaccination
     else {
       const data: VaccinationPass = {
@@ -160,12 +166,12 @@ export function VaccinationStepForm({
           {
             ...values.vaccination,
             date: new Date(values.vaccination.date),
-          }
+          },
         ],
         special_tests: [],
         allergies_or_medical_notes: [],
       };
-      
+
       if (onSubmit) {
         onSubmit(data);
       }
@@ -235,7 +241,13 @@ export function VaccinationStepForm({
                     <FormItem>
                       <FormLabel>Vaccination Date</FormLabel>
                       <FormControl>
-                        <Input type="date" placeholder="YYYY-MM-DD" {...field} />
+                        <Calendar
+                          mode="single"
+                          selected={field.value ? new Date(field.value) : undefined}
+                          onSelect={(date) =>
+                            field.onChange(date ? date.toISOString().split("T")[0] : "")
+                          }
+                        />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -294,10 +306,7 @@ export function VaccinationStepForm({
           </CardContent>
         </Card>
 
-        <Button 
-          type="submit"
-          className="w-full gap-2"
-        >
+        <Button type="submit" className="w-full gap-2">
           <Save className="h-4 w-4" />
           {isEdit ? "Save Changes" : "Add Vaccination"}
         </Button>
