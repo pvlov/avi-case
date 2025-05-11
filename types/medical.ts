@@ -2,7 +2,6 @@ export interface MedicalDocument {
   generatedTitle?: string;
   dateIssued: string | null;
   doctorName: string | null;
-  generatedTitle: string;
   patient: {
     name: string | null;
     birth_date: string | null;
@@ -116,7 +115,7 @@ export interface VaccinationPass {
     date_of_birth: string;
     gender: string | null;
   };
-  vaccinations: Vaccination[];
+  vaccinations: VaccinationEntry[];
   special_tests: SpecialTest[];
   allergies_or_medical_notes: string[];
 }
