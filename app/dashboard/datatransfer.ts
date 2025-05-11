@@ -75,7 +75,7 @@ export function transformStoreDataToDashboard(): MedicalData {
       id: record.id,
       date: new Date((record.data as MedicalDocument).dateIssued || record.createdAt),
       type: "document",
-      title: record.title,
+      title: (record.data as MedicalDocument).generatedTitle || record.title,
       description: record.notes || "",
       doctorName: (record.data as MedicalDocument).doctorName || "",
       documentId: record.id,
