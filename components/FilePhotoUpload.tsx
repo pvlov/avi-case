@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Camera, CameraIcon, File, Upload, X } from "lucide-react";
+import { Camera, CameraIcon, File as FileIcon, Upload, X } from 'lucide-react';
 import { useState, useRef, useCallback, useEffect, forwardRef } from "react";
 import Webcam from "react-webcam";
 
@@ -135,7 +135,7 @@ export const FilePhotoUpload = forwardRef<HTMLInputElement, FilePhotoUploadProps
               className="w-fit gap-2"
               onClick={() => document.getElementById("file-upload")?.click()}
             >
-              <File className="h-4 w-4" />
+              <FileIcon className="h-4 w-4" />
               Select Files
             </Button>
             <Button variant="outline" className="w-fit gap-2" onClick={startCamera}>
@@ -153,7 +153,7 @@ export const FilePhotoUpload = forwardRef<HTMLInputElement, FilePhotoUploadProps
                   className="border-border bg-muted/20 flex items-center justify-between rounded-md border p-2"
                 >
                   <div className="flex items-center overflow-hidden">
-                    <File className="mr-2 h-4 w-4 flex-shrink-0" />
+                    <FileIcon className="mr-2 h-4 w-4 flex-shrink-0" />
                     <span className="truncate text-sm">{file.name}</span>
                   </div>
                   <Button
@@ -203,3 +203,5 @@ export const FilePhotoUpload = forwardRef<HTMLInputElement, FilePhotoUploadProps
     </div>
   );
 });
+
+FilePhotoUpload.displayName = 'FilePhotoUpload';

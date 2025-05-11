@@ -18,6 +18,8 @@
         "@radix-ui/react-popover": "^1.1.13",
         "@radix-ui/react-progress": "^1.1.6",
         "@radix-ui/react-scroll-area": "^1.2.8",
+        "@radix-ui/react-select": "^2.2.4",
+        "@radix-ui/react-separator": "^1.1.6",
         "@radix-ui/react-slot": "^1.2.2",
         "@radix-ui/react-tabs": "^1.1.11",
         "add": "^2.0.6",
@@ -40,6 +42,7 @@
         "react-hook-form": "^7.56.3",
         "react-webcam": "^7.2.0",
         "shadcn": "^2.5.0",
+        "sonner": "^2.0.3",
         "tailwind-merge": "^3.2.0",
         "tailwind-variants": "^1.0.0",
         "ts-node": "^10.9.2",
@@ -1487,6 +1490,8 @@
     "sisteransi": ["sisteransi@1.0.5", "", {}, "sha512-bLGGlR1QxBcynn2d5YmDX4MGjlZvy2MRBDRNHLJ8VI6l6+9FUiyTFNJ0IveOSP0bcXgVDPRcfGqA0pjaqUpfVg=="],
 
     "sleuth": ["sleuth@0.1.1", "", { "dependencies": { "is-require": "0.0.1", "static-eval": "~0.1.0" } }, "sha512-x9msqhyOx9CoQnBH6cKz6CIi4brtwke+obbrFdA1Y7FVLhY/vn3By0Al1ydGLZM0hczWNp2Ahx/4G+3zebVIxQ=="],
+
+    "sonner": ["sonner@2.0.3", "", { "peerDependencies": { "react": "^18.0.0 || ^19.0.0 || ^19.0.0-rc", "react-dom": "^18.0.0 || ^19.0.0 || ^19.0.0-rc" } }, "sha512-njQ4Hht92m0sMqqHVDL32V2Oun9W1+PHO9NDv9FHfJjT3JT22IG4Jpo3FPQy+mouRKCXFWO+r67v6MrHX2zeIA=="],
 
     "source-map": ["source-map@0.6.1", "", {}, "sha512-UjgapumWlbMhkBgzT7Ykc5YXUT46F0iKu8SGXq0bcwP5dz/h0Plj6enJqjz1Zbq2l5WaqYnrVbwWOWMyF3F47g=="],
 

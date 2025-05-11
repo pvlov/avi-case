@@ -85,7 +85,7 @@ export const PROMPTS: Record<DocType, string> = {
         name: string;
         quantity: number;
         unit: string;
-  
+      },
       procedures: {
         name: string;
         date: string | null;
