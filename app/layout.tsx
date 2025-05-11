@@ -4,6 +4,7 @@ import { Navbar } from "@/components/Navbar";
 import { ThemeProvider } from "@/components/theme-provider";
 import { Inter } from "next/font/google";
 import { MedicalStoreProvider } from "@/lib/MedicalStoreProvider";
+import { Toaster } from "@/components/ui/sonner";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -32,6 +33,7 @@ export default function RootLayout({
           <MedicalStoreProvider>
             <Navbar />
             <main className="pt-12">{children}</main>
+            <Toaster />
           </MedicalStoreProvider>
         </ThemeProvider>
       </body>

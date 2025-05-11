@@ -14,6 +14,14 @@ import { MedicalDocumentStepForm } from "./MedicalDocumentStepForm";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
+import { 
+  Select, 
+  SelectContent, 
+  SelectItem, 
+  SelectTrigger, 
+  SelectValue 
+} from "@/components/ui/select";
+import { toast } from "sonner";
 
 // Simple stable selectors
 const selectRecords = (state: any) => state.records;
@@ -38,6 +46,7 @@ export default function MedicalDocumentStep() {
   
   // Get records with a stable selector
   const allRecords = useMedicalStore(selectRecords);
+  const updateRecord = useMedicalStore(selectUpdateRecord);
   const addRecord = useMedicalStore(selectAddRecord);
   
   // Memoize the filtered records
@@ -63,7 +72,7 @@ export default function MedicalDocumentStep() {
     }
   }, [medicalDocRecords, fileBatches.length]);
 
-  // Set up store integration
+  // Set up store integration - only used for adding new records
   const { handleSubmit, isSubmitting, error } = useFormWithStore<MedicalDocument>(
     DocType.DOCUMENT,
     {
@@ -80,6 +89,12 @@ export default function MedicalDocumentStep() {
     return `batch-${Date.now()}-${Math.floor(Math.random() * 1000)}`;
   };
 
+  // Add a reference to track the FilePhotoUpload component
+  const fileUploadRef = useRef<HTMLInputElement>(null);
+
+  // Add state to track file upload key for resetting
+  const [fileUploadKey, setFileUploadKey] = useState<number>(0);
+
   const addNewBatch = async () => {
     if (currentFiles.length === 0) return;
     
@@ -92,7 +107,10 @@ export default function MedicalDocumentStep() {
     
     // Update state with new batch
     setFileBatches(prev => [...prev, newBatch]);
+    
+    // Reset file input and increment key to force component reset
     setCurrentFiles([]);
+    setFileUploadKey(prev => prev + 1);
     
     // Process directly using the newBatch object's files
     const formData = new FormData();
@@ -243,38 +261,137 @@ export default function MedicalDocumentStep() {
   };
 
   const handleFormSubmit = async (data: MedicalDocument) => {
-    // Find if there's an existing batch to update
-    const existingBatchIndex = fileBatches.findIndex(batch => batch.isProcessed && batch.documentData);
-    
-    if (existingBatchIndex >= 0) {
-      // Update existing batch
-      const batch = fileBatches[existingBatchIndex];
+    // Generate a title if one doesn't exist
+    if (!data.generatedTitle) {
+      const titleParts = [];
       
-      // Add or update record in store
-      await handleSubmit(data);
+      // Add doctor name if available
+      if (data.doctorName) {
+        titleParts.push(`Dr. ${data.doctorName}`);
+      }
       
-      // Update batch data
-      setFileBatches(prev => 
-        prev.map((b, i) => 
-          i === existingBatchIndex 
-            ? {...b, documentData: data} 
-            : b
-        )
-      );
-    } else {
-      // Create new batch from manual entry
-      const recordId = await handleSubmit(data);
+      // Add date if available
+      if (data.dateIssued) {
+        const date = new Date(data.dateIssued);
+        titleParts.push(date.toLocaleDateString());
+      }
       
-      const newBatch: FileBatch = {
-        id: typeof recordId === 'string' ? recordId : generateBatchId(),
-        files: [],
-        isProcessing: false,
-        isProcessed: true,
-        documentData: data
-      };
+      // Add diagnosis if available
+      if (data.diagnosis && data.diagnosis.length > 0) {
+        titleParts.push(data.diagnosis[0]);
+      }
       
-      setFileBatches(prev => [...prev, newBatch]);
+      // Create title or use fallback
+      data.generatedTitle = titleParts.length > 0 
+        ? titleParts.join(' - ') 
+        : `Medical Document ${new Date().toLocaleDateString()}`;
     }
+
+    // Check if we're updating an existing document
+    if (selectedDocumentId) {
+      // Find the batch to update
+      const batchToUpdate = fileBatches.find(batch => batch.id === selectedDocumentId);
+      
+      if (batchToUpdate) {
+        // Update the existing record in the store
+        updateRecord(selectedDocumentId, {
+          data: data,
+          title: data.generatedTitle || "Medical Document",
+          updatedAt: new Date()
+        });
+        
+        // Update batch data in local state
+        setFileBatches(prev => 
+          prev.map(b => 
+            b.id === selectedDocumentId 
+              ? {...b, documentData: data} 
+              : b
+          )
+        );
+        
+        // Success notification or additional actions can be added here
+        return selectedDocumentId;
+      }
+    }
+    
+    // Create new document (only if no selectedDocumentId or batch not found)
+    const recordId = addRecord({
+      docType: DocType.DOCUMENT,
+      title: data.generatedTitle || "Medical Document",
+      data: data
+    });
+    
+    const newBatch: FileBatch = {
+      id: recordId as string,
+      files: [],
+      isProcessing: false,
+      isProcessed: true,
+      documentData: data
+    };
+    
+    setFileBatches(prev => [...prev, newBatch]);
+    setSelectedDocumentId(recordId as string);
+    
+    return recordId;
+  };
+
+  // Additional state for selected document
+  const [selectedDocumentId, setSelectedDocumentId] = useState<string | null>(null);
+
+  // Function to handle creating a new document
+  const handleCreateNewDocument = () => {
+    setSelectedDocumentId(null);
+    
+    const newBatch: FileBatch = {
+      id: generateBatchId(),
+      files: [],
+      isProcessing: false,
+      isProcessed: true,
+      documentData: {
+        generatedTitle: `New Document ${new Date().toLocaleDateString()}`,
+        dateIssued: new Date().toISOString().split('T')[0],
+        doctorName: null,
+        patient: {
+          name: null,
+          birth_date: null,
+          gender: null,
+          height_cm: null,
+          weight_kg: null,
+          bmi: null,
+        },
+        vitals: {
+          blood_pressure: null,
+          heart_rate: null,
+          temperature_c: null,
+          respiratory_rate: null,
+        },
+        anamnesis: null,
+        statusAtAdmission: null,
+        diagnosis: [],
+        therapy: [],
+        progress: null,
+        ekg: {
+          date: null,
+          details: null,
+        },
+        lab_parameters: [],
+        procedures: [],
+        medications: [],
+        discharge_notes: null,
+      }
+    };
+    
+    setFileBatches(prev => [...prev, newBatch]);
+    
+    // Set timeout to ensure the batch is added to the state before selecting it
+    setTimeout(() => {
+      setSelectedDocumentId(newBatch.id);
+    }, 0);
+  };
+
+  // Add a function to clear document selection
+  const clearDocumentSelection = () => {
+    setSelectedDocumentId(null);
   };
 
   return (
@@ -300,9 +417,11 @@ export default function MedicalDocumentStep() {
         <div className="space-y-4">
           {/* Current file upload area */}
           <FilePhotoUpload
+            key={fileUploadKey}
             onFilesChange={handleFilesChange}
             title=""
             subtitle="PDF, JPG, or PNG (max 10 files)"
+            ref={fileUploadRef}
           />
           <div className="flex justify-end">
             <Button 
@@ -332,7 +451,7 @@ export default function MedicalDocumentStep() {
                         </div>
                         <div className="flex items-center gap-2">
                           {batch.isProcessed ? (
-                            <Badge variant="outline" className="bg-green-50">Processed</Badge>
+                            <Badge variant="outline" className="bg-green-50 text-avi-purple">Processed</Badge>
                           ) : batch.isProcessing ? (
                             <Spinner className="size-4" />
                           ) : (
@@ -370,28 +489,87 @@ export default function MedicalDocumentStep() {
       </TabsContent>
       
       <TabsContent value="manual" className="p-4">
-        <ScrollArea className="h-[600px] w-full">
+        <ScrollArea className="h-[200px] md:h-[370px] xl:h-[500px] w-full">
           {fileBatches.length > 0 ? (
             <div className="space-y-8">
-              {fileBatches.map((batch, index) => (
-                <div key={batch.id}>
-                  <div className="flex items-center justify-between mb-4">
-                    <h3 className="text-lg font-medium">Document {index + 1}</h3>
+              {/* Document selector using Select component */}
+              <div className="mb-6">
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="text-lg font-medium">Select Document</h3>
                     <Button 
-                      variant="ghost" 
-                      size="icon"
-                      onClick={() => removeBatch(batch.id)}
+                      variant="outline" 
+                      size="sm" 
+                      className="gap-1"
+                      onClick={handleCreateNewDocument}
                     >
-                      <Trash2 className="size-4" />
+                      <Plus className="size-4" /> New Document
                     </Button>
-                  </div>
-                  <MedicalDocumentStepForm 
-                    onSubmit={handleFormSubmit} 
-                    defaultValues={batch.documentData}
-                    isEdit={!!batch.documentData}
-                  />
                 </div>
-              ))}
+                
+                <Select 
+                  value={selectedDocumentId || ""} 
+                  onValueChange={(value) => setSelectedDocumentId(value || null)}
+                >
+                  <SelectTrigger className="w-full">
+                    <SelectValue placeholder="Select a document" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {fileBatches.length === 0 ? (
+                      <div className="px-2 py-4 text-center text-sm text-muted-foreground">
+                        No documents available
+                      </div>
+                    ) : (
+                      fileBatches.map((batch, index) => (
+                        <SelectItem key={batch.id} value={batch.id}>
+                          {batch.documentData?.generatedTitle || `Document ${index + 1}`}
+                        </SelectItem>
+                      ))
+                    )}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              {/* Display selected document form or prompt to select */}
+              {selectedDocumentId ? (
+                fileBatches
+                  .filter(batch => batch.id === selectedDocumentId)
+                  .map((batch, index) => (
+                    <div key={batch.id}>
+                      <div className="flex items-center justify-end mb-4 gap-2">
+                        <Button 
+                          type="submit"
+                          form={`medical-doc-form-${batch.id}`}
+                          variant="default"
+                        >
+                          {!!batch.documentData ? "Update" : "Save"}
+                        </Button>
+                        <Button 
+                          variant="secondary" 
+                          size="icon"
+                          onClick={() => {
+                            removeBatch(batch.id);
+                            toast.info("Document removed", {
+                              description: "The document has been deleted",
+                            });
+                          }}
+                        >
+                          <Trash2 className="size-4" />
+                        </Button>
+                      </div>
+                      <MedicalDocumentStepForm 
+                        onSubmit={handleFormSubmit} 
+                        defaultValues={batch.documentData}
+                        isEdit={!!batch.documentData}
+                        batchId={batch.id}
+                        formId={`medical-doc-form-${batch.id}`}
+                      />
+                    </div>
+                  ))
+              ) : (
+                <div className="flex flex-col items-center justify-center p-8 text-center">
+                  <p className="mb-4 text-muted-foreground">Select a document to view or edit</p>
+                </div>
+              )}
             </div>
           ) : (
             <div className="flex flex-col items-center justify-center p-8 text-center">

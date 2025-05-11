@@ -115,7 +115,7 @@ export function VaccinationTable({
                   </div>
                   <div className="grid grid-cols-2">
                     <span className="text-muted-foreground">Doctor</span>
-                    <span>{vax.doctor || "N/A"}</span>
+                    <span className="truncate max-w-[150px]">{vax.doctor || "N/A"}</span>
                   </div>
                 </div>
               </AccordionContent>
@@ -148,7 +148,9 @@ export function VaccinationTable({
                 <TableCell>{vax.date ? formatDate(vax.date) : "N/A"}</TableCell>
                 <TableCell>{vax.trade_name || "N/A"}</TableCell>
                 <TableCell>{vax.batch_number || "N/A"}</TableCell>
-                <TableCell>{vax.doctor || "N/A"}</TableCell>
+                <TableCell className="max-w-[150px]">
+                  <span className="truncate block">{vax.doctor || "N/A"}</span>
+                </TableCell>
                 {editable && (
                   <TableCell>
                     <Button
