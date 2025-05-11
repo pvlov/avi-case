@@ -184,8 +184,11 @@ export const parseDocuments = async <T>(formData: FormData): Promise<Result<T, s
         if (parsedData.dateOfBirth) {
           parsedData.dateOfBirth = new Date(parsedData.dateOfBirth);
         }
-        if (parsedData.validUntil) {
-          parsedData.validUntil = new Date(parsedData.validUntil);
+        if (parsedData.validFrom) {
+          parsedData.validFrom = new Date(parsedData.validFrom);
+        }
+        if (parsedData.validTo) {
+          parsedData.validTo = new Date(parsedData.validTo);
         }
       }
 

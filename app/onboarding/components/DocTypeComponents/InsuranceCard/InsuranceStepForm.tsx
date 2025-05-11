@@ -59,16 +59,16 @@ export function InsuranceStepForm({
   // Format dates properly for the form
   const formattedDefaultValues = defaultValues
     ? {
-        insurerName: defaultValues.insuranceName,
-        insurerId: defaultValues.insuranceNumber,
-        memberId: defaultValues.personalNumber,
+        insurerName: defaultValues.insurerName,
+        insurerId: defaultValues.insurerId,
+        memberId: defaultValues.memberId,
         givenName: defaultValues.givenName,
         familyName: defaultValues.familyName,
         dateOfBirth: defaultValues.dateOfBirth
           ? new Date(defaultValues.dateOfBirth).toISOString().split("T")[0]
           : "",
-        validUntil: defaultValues.validUntil
-          ? new Date(defaultValues.validUntil).toISOString().split("T")[0]
+        validUntil: defaultValues.validTo
+          ? new Date(defaultValues.validTo).toISOString().split("T")[0]
           : "",
         cardNumber: defaultValues.cardNumber,
       }
@@ -94,6 +94,13 @@ export function InsuranceStepForm({
       ...defaultValues,
       [fieldName]: value,
     };
+
+    // Map form fields to data model fields
+    if (fieldName === 'validUntil') {
+      updatedData.validTo = value ? new Date(value) : null;
+    } else if (fieldName === 'dateOfBirth') {
+      updatedData.dateOfBirth = value ? new Date(value) : null;
+    }
 
     if (onSubmit) {
       onSubmit(updatedData);
