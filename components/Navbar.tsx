@@ -29,27 +29,15 @@ import {
 export function Navbar() {
   return (
     <div className="bg-background/95 supports-[backdrop-filter]:bg-background/60 fixed top-0 right-0 left-0 z-50 flex h-12 items-center border-b px-10 shadow-sm backdrop-blur">
-      {/* Logo or Brand */}
-      <div className="mr-4">
-        <Link href="/" className="text-lg font-bold">
-          n/avi
-        </Link>
-      </div>
-
       {/* Primary nav links */}
-      <NavigationMenu>
-        <NavigationMenuList>
       <NavigationMenu className="w-full">
         <NavigationMenuList className="flex justify-center md:justify-start w-full">
           <NavigationMenuItem>
-            <Link href="/" className={navigationMenuTriggerStyle()}>
-              Home
+            <Link href="/" className={cn("text-lg font-bold" ,navigationMenuTriggerStyle())}>
+              n/avi
             </Link>
           </NavigationMenuItem>
           <NavigationMenuItem>
-            <Link href="/dashboard" className={navigationMenuTriggerStyle()}>
-              Dashboard
-            </Link>
             <NavigationMenuLink
               className={cn(
                 navigationMenuTriggerStyle(),
@@ -103,8 +91,8 @@ export function Navbar() {
                     className="w-full text-left justify-start font-normal px-2 py-1 h-auto hover:bg-accent rounded">
                     Sign out
                   </Button>
-      </div>
-    </PopoverContent>
+                </div>
+          </PopoverContent>
         </Popover>
       </div>
     </div>

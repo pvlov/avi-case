@@ -32,9 +32,6 @@ export default function RootLayout({
         >
           <MedicalStoreProvider>
             <Navbar />
-            <main className="pt-12">
-              {children}
-            </main>
             <main className="pt-12">{children}</main>
             <Toaster />
           </MedicalStoreProvider>
