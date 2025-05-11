@@ -1,11 +1,11 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { TimelineView } from "./components/TimelineView";
 import { CategoryView } from "./components/CategoryView";
-import { fetchMedicalData } from "./datatransfer";
-import { useEffect } from "react";
+import { transformStoreDataToDashboard } from "./datatransfer";
 import { TimelineItem, CategoryItem, PersonalInfoItem } from "@/types/dashboard";
+import { printStoreState } from '@/lib/store';
 
 export default function Dashboard() {
   const [timelineItems, setTimelineItems] = useState<TimelineItem[]>([]);
@@ -17,17 +17,15 @@ export default function Dashboard() {
   const [personalInfo, setPersonalInfo] = useState<PersonalInfoItem | null>(null);
 
   useEffect(() => {
-    const loadData = async () => {
-      const data = await fetchMedicalData();
-      setTimelineItems(data.documents);
-      setCategories({
-        medications: data.medications,
-        vaccinations: data.vaccinations,
-        procedures: data.procedures,
-      });
-      setPersonalInfo(data.personalInfo);
-    };
-    loadData();
+    // Load data from store
+    const data = transformStoreDataToDashboard();
+    setTimelineItems(data.documents);
+    setCategories({
+      medications: data.medications,
+      vaccinations: data.vaccinations,
+      procedures: data.procedures,
+    });
+    setPersonalInfo(data.personalInfo);
   }, []);
 
   const handleHover = (documentId: string | null) => {

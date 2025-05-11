@@ -1,5 +1,6 @@
 import { TimelineItem, CategoryItem, PersonalInfoItem } from "@/types/dashboard";
 import { MedicalDocument, VaccinationEntry, DocType, Medication, Procedure } from "@/types/medical";
+import { useMedicalStore } from "@/lib/store";
 
 export interface MedicalData {
   documents: TimelineItem[];
@@ -64,301 +65,98 @@ function convertLabResultsToCategory(doc: MedicalDocument, docId: string): Categ
   }));
 }
 
-export async function fetchMedicalData(): Promise<MedicalData> {
-  try {
-    const mockMedicalDocs: MedicalDocument[] = [
-      {
-        generatedTitle: "General Checkup Visit",
-        dateIssued: "2024-02-15",
-        doctorName: "Dr. Schmidt",
-        patient: {
-          name: "John Doe",
-          birth_date: null,
-          gender: null,
-          height_cm: null,
-          weight_kg: null,
-          bmi: null,
-        },
-        vitals: {
-          blood_pressure: null,
-          heart_rate: null,
-          temperature_c: null,
-          respiratory_rate: null
-        },
-        anamnesis: null,
-        statusAtAdmission: null,
-        diagnosis: ["Common Cold", "Mild Fever"],
-        therapy: [],
-        progress: null,
-        ekg: { date: null, details: null },
-        lab_parameters: [
-          { name: "Blood Count", quantity: 1, unit: "Normal" },
-          { name: "CRP", quantity: 1, unit: "Slightly Elevated" }
-        ],
-        procedures: [
-          {
-            name: "Blood Test",
-            date: "2024-02-15",
-            indication: "Routine Check",
-            findings: "Normal blood count, slightly elevated CRP",
-          },
-          {
-            name: "ECG",
-            date: "2024-02-15",
-            indication: "Preventive Check",
-            findings: "Normal sinus rhythm",
-          },
-        ],
-        medications: [
-          {
-            name: "Ibuprofen",
-            dosage: "400mg",
-            frequency: "3x daily",
-            duration: "5 days",
-          },
-          {
-            name: "Amoxicillin",
-            dosage: "500mg",
-            frequency: "2x daily",
-            duration: "7 days",
-          },
-        ],
-        discharge_notes: null,
-      },
-      {
-        generatedTitle: "Cardiology Consultation",
-        dateIssued: "2024-01-10",
-        doctorName: "Dr. Weber",
-        patient: {
-          name: "John Doe",
-          birth_date: null,
-          gender: null,
-          height_cm: null,
-          weight_kg: null,
-          bmi: null,
-        },
-        vitals: {
-          blood_pressure: null,
-          heart_rate: null,
-          temperature_c: null,
-          respiratory_rate: null
-        },
-        anamnesis: null,
-        statusAtAdmission: null,
-        diagnosis: ["Mild Hypertension"],
-        therapy: [],
-        progress: null,
-        ekg: { date: null, details: null },
-        lab_parameters: [
-          { name: "Blood Count", quantity: 1, unit: "Normal" },
-          { name: "CRP", quantity: 1, unit: "Slightly Elevated" }
-        ],
-        procedures: [
-          {
-            name: "ECG",
-            date: "2024-01-10",
-            indication: "Chest Pain",
-            findings: "Normal sinus rhythm, no abnormalities",
-          },
-        ],
-        medications: [
-          {
-            name: "Lisinopril",
-            dosage: "10mg",
-            frequency: "1x daily",
-            duration: "30 days",
-          },
-        ],
-        discharge_notes: null,
-      },
-      {
-        generatedTitle: "Orthopedic Evaluation",
-        dateIssued: "2023-12-05",
-        doctorName: "Dr. Mueller",
-        patient: {
-          name: "John Doe",
-          birth_date: null,
-          gender: null,
-          height_cm: null,
-          weight_kg: null,
-          bmi: null,
-        },
-        vitals: {
-          blood_pressure: null,
-          heart_rate: null,
-          temperature_c: null,
-          respiratory_rate: null
-        },
-        anamnesis: null,
-        statusAtAdmission: null,
-        diagnosis: ["Knee Osteoarthritis"],
-        therapy: [],
-        progress: null,
-        ekg: { date: null, details: null },
-        lab_parameters: [
-          { name: "Blood Count", quantity: 1, unit: "Normal" },
-          { name: "CRP", quantity: 1, unit: "Slightly Elevated" }
-        ],
-        procedures: [
-          {
-            name: "Knee X-Ray",
-            date: "2023-12-05",
-            indication: "Chronic Knee Pain",
-            findings: "Mild joint space narrowing",
-          },
-        ],
-        medications: [
-          {
-            name: "Diclofenac",
-            dosage: "75mg",
-            frequency: "2x daily",
-            duration: "14 days",
-          },
-        ],
-        discharge_notes: null,
-      },
-      {
-        generatedTitle: "Dermatology Visit",
-        dateIssued: "2023-11-20",
-        doctorName: "Dr. Fischer",
-        patient: {
-          name: "John Doe",
-          birth_date: null,
-          gender: null,
-          height_cm: null,
-          weight_kg: null,
-          bmi: null,
-        },
-        vitals: {
-          blood_pressure: null,
-          heart_rate: null,
-          temperature_c: null,
-          respiratory_rate: null
-        },
-        anamnesis: null,
-        statusAtAdmission: null,
-        diagnosis: ["Eczema"],
-        therapy: [],
-        progress: null,
-        ekg: { date: null, details: null },
-        lab_parameters: [
-          { name: "Blood Count", quantity: 1, unit: "Normal" },
-          { name: "CRP", quantity: 1, unit: "Slightly Elevated" }
-        ],
-        procedures: [
-          {
-            name: "Skin Biopsy",
-            date: "2023-11-20",
-            indication: "Suspicious Lesion",
-            findings: "Benign, no malignancy",
-          },
-        ],
-        medications: [
-          {
-            name: "Hydrocortisone Cream",
-            dosage: "1%",
-            frequency: "2x daily",
-            duration: "10 days",
-          },
-        ],
-        discharge_notes: null,
-      },
-    ];
+export function transformStoreDataToDashboard(): MedicalData {
+  const state = useMedicalStore.getState();
+  
+  // Transform records to timeline items
+  const timelineItems: TimelineItem[] = state.records
+    .filter(record => record.docType === DocType.DOCUMENT)
+    .map(record => ({
+      id: record.id,
+      date: record.createdAt,
+      type: "document",
+      title: record.title,
+      description: record.notes || "",
+      doctorName: (record.data as MedicalDocument).doctorName || "",
+      documentId: record.id,
+      isHighlighted: false
+    }));
 
-    const mockVaccinations: VaccinationEntry[] = [
-      {
-        vaccine: "COVID-19",
-        date: new Date("2024-01-20"),
-        trade_name: "Comirnaty",
-        batch_number: "BNT162b2-123",
-        doctor: "Dr. Mueller",
-        location: "City Clinic",
-        notes: "Booster shot",
-      },
-      {
-        vaccine: "Influenza",
-        date: new Date("2023-11-15"),
-        trade_name: "Fluarix Tetra",
-        batch_number: "FLU2023-456",
-        doctor: "Dr. Weber",
-        location: "Family Practice",
-        notes: "Annual flu shot",
-      },
-      {
-        vaccine: "Tetanus",
-        date: new Date("2023-09-10"),
-        trade_name: "Tetavax",
-        batch_number: "TET2023-789",
-        doctor: "Dr. Schmidt",
-        location: "General Hospital",
-        notes: "10-year booster",
-      },
-    ];
-
-    // Convert all documents to timeline items
-    const timelineItems = mockMedicalDocs.map((doc) => convertMedicalDocumentToTimeline(doc));
-
-    // Combine all medications from all documents
-    const allMedications = mockMedicalDocs.flatMap((doc, index) =>
-      convertMedicationsToCategory(doc, timelineItems[index].documentId),
+  // Transform vaccination records
+  const vaccinations: CategoryItem[] = state.records
+    .filter(record => record.docType === DocType.VACCINEPASS)
+    .flatMap(record => 
+      (record.data.vaccinations as VaccinationEntry[]).map(vac => ({
+        id: record.id + "-" + vac.vaccine,
+        title: `${vac.vaccine} ${vac.trade_name ? `(${vac.trade_name})` : ""}`,
+        date: vac.date,
+        type: "vaccination",
+        documentId: record.id,
+        trade_name: vac.trade_name,
+        batch_number: vac.batch_number,
+        doctor: vac.doctor,
+        location: vac.location,
+        notes: vac.notes
+      }))
     );
 
-    // Combine all procedures from all documents
-    const allProcedures = mockMedicalDocs.flatMap((doc, index) =>
-      doc.procedures.map((proc) => ({
-        id: crypto.randomUUID(),
-        title: `${proc.name}`,
-        date: new Date(proc.date || ""),
+  // Transform medication records
+  const medications: CategoryItem[] = state.records
+    .filter(record => record.docType === DocType.DOCUMENT)
+    .flatMap(record => 
+      (record.data as MedicalDocument).medications.map(med => ({
+        id: record.id + "-" + med.name,
+        title: med.name,
+        date: new Date(record.data.dateIssued || record.createdAt),
+        type: "medication",
+        documentId: record.id,
+        dosage: med.dosage || undefined,
+        frequency: med.frequency || undefined,
+        duration: med.duration || undefined
+      }))
+    );
+
+  // Transform procedures
+  const procedures: CategoryItem[] = state.records
+    .filter(record => record.docType === DocType.DOCUMENT)
+    .flatMap(record => 
+      (record.data as MedicalDocument).procedures.map(proc => ({
+        id: record.id + "-" + proc.name,
+        title: proc.name,
+        date: new Date(proc.date || record.data.dateIssued || record.createdAt),
         type: "procedure",
-        documentId: timelineItems[index].documentId,
+        documentId: record.id,
         indication: proc.indication || undefined,
-        findings: proc.findings || undefined,
-      })),
+        findings: proc.findings || undefined
+      }))
     );
 
-    return {
-      documents: timelineItems,
-      medications: allMedications,
-      vaccinations: mockVaccinations.map((vac) => convertVaccinationToCategory(vac)),
-      labResults: convertLabResultsToCategory(mockMedicalDocs[0], timelineItems[0].documentId),
-      procedures: allProcedures,
-      personalInfo: {
-        insuranceData: {
-          insurerName: "TK",
-          insurerId: "12345",
-          memberId: "A123456789",
-          givenName: "John",
-          familyName: "Doe",
-          dateOfBirth: new Date("1990-01-01"),
-          validFrom: new Date("2024-01-01"),
-          validTo: new Date("2024-12-31"),
-          cardSerialNumber: "123456789",
-          cardNumber: "987654321"
-        },
-      },
-    };
-  } catch (error) {
-    console.error("Error fetching medical data:", error);
-    return {
-      documents: [],
-      medications: [],
-      vaccinations: [],
-      labResults: [],
-      procedures: [],
-      personalInfo: {
-        insuranceData: {
-          insurerName: "TK",
-          insurerId: "12345",
-          memberId: "A123456789",
-          givenName: "John",
-          familyName: "Doe",
-          dateOfBirth: new Date("1990-01-01"),
-          validFrom: new Date("2024-01-01"),
-          validTo: new Date("2024-12-31"),
-          cardSerialNumber: "123456789",
-          cardNumber: "987654321"
-        },
-      },
-    };
-  }
+  // Get insurance data
+  const insuranceRecord = state.records.find(record => 
+    record.docType === DocType.INSURANCECARD
+  );
+
+  const personalInfo: PersonalInfoItem = {
+    insuranceData: insuranceRecord ? insuranceRecord.data : {
+      givenName: state.currentUser?.name || "",
+      familyName: "",
+      dateOfBirth: state.currentUser?.dateOfBirth || new Date(),
+      insurerName: "",
+      insurerId: "",
+      memberId: "",
+      cardNumber: "",
+      cardSerialNumber: "",
+      validFrom: new Date(),
+      validTo: new Date()
+    }
+  };
+
+  return {
+    documents: timelineItems,
+    medications,
+    vaccinations,
+    procedures,
+    personalInfo,
+    labResults: [] // Not implemented yet
+  };
 }

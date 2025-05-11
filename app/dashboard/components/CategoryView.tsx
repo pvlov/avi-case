@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { File, Pill, Syringe, TestTube, User, Stethoscope } from "lucide-react";
 import { format } from "date-fns";
 import { CategoryItem, PersonalInfoItem } from "@/types/dashboard";
-import { InsuranceCardData, Vaccination, Medication, Procedure, VaccinationPass } from "@/types/medical";
+import { InsuranceCard, Medication, Procedure, VaccinationPass } from "@/types/medical";
 import { VaccinationTable } from "@/app/onboarding/components/DocTypeComponents/Vaccinations/VaccinationTable";
 import { MedicationTable } from "./tables/MedicationTable";
 import { ProcedureTable } from "./tables/ProcedureTable";
@@ -25,7 +25,9 @@ export function CategoryView({ personalInfo, categories, onHoverCategory }: Cate
   const vaccinationPassData: VaccinationPass = {
     person: {
       name: `${personalInfo.insuranceData.givenName} ${personalInfo.insuranceData.familyName}`,
-      date_of_birth: personalInfo.insuranceData.dateOfBirth.toISOString(),
+      date_of_birth: typeof personalInfo.insuranceData.dateOfBirth === 'string' 
+        ? personalInfo.insuranceData.dateOfBirth 
+        : personalInfo.insuranceData.dateOfBirth.toISOString(),
       gender: null,
     },
     vaccinations: categories.vaccinations.map(item => ({
@@ -140,7 +142,7 @@ export function CategoryView({ personalInfo, categories, onHoverCategory }: Cate
   );
 }
 
-function PersonalInfoSection({ info }: { info: InsuranceCardData }) {
+function PersonalInfoSection({ info }: { info: InsuranceCard }) {
   return (
     <Card>
       <CardHeader>

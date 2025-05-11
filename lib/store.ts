@@ -1,6 +1,6 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
-import { InsuranceCard, Vaccination, DocType } from "@/types/medical";
+import { InsuranceCard, VaccinationPass, DocType } from "@/types/medical";
 
 interface MedicalDocument {
   id: string;
@@ -12,7 +12,7 @@ interface MedicalDocument {
 }
 
 interface MedicalRecord extends MedicalDocument {
-  data: InsuranceCard | Vaccination | any;
+  data: InsuranceCard | VaccinationPass | any;
 }
 
 interface UserProfile {
@@ -139,5 +139,18 @@ export const useVaccinationRecords = () => {
   const records = useMedicalStore((state) =>
     state.records.filter((record) => record.docType === DocType.VACCINEPASS),
   );
-  return records as (MedicalRecord & { data: Vaccination })[];
+  return records as (MedicalRecord & { data: VaccinationPass })[];
 };
+
+// Debug helper to print store state
+export const printStoreState = () => {
+  const state = useMedicalStore.getState();
+  console.log('Current Medical Store State:', {
+    currentUser: state.currentUser,
+    records: state.records,
+    currentStep: state.currentStep,
+    isLoading: state.isLoading
+  });
+};
+
+
