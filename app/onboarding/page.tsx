@@ -137,16 +137,27 @@ export default function Onboarding() {
           <ChevronLeft className="h-4 w-4" />
           Previous
         </Button>
-        <Button
-          variant="default"
-          size="sm"
-          onClick={handleNext}
-          disabled={currentStepNum === steps.length}
-          className="gap-1"
-        >
-          Next
-          <ChevronRight className="h-4 w-4" />
-        </Button>
+        {currentStepNum === steps.length ? (
+          <Button
+            variant="default"
+            size="sm"
+            onClick={() => router.push('/dashboard')}
+            className="gap-1"
+          >
+            Dashboard
+            <ChevronRight className="h-4 w-4" />
+          </Button>
+        ) : (
+          <Button
+            variant="default"
+            size="sm"
+            onClick={handleNext}
+            className="gap-1"
+          >
+            Next
+            <ChevronRight className="h-4 w-4" />
+          </Button>
+        )}
       </div>
     </Section>
   );
