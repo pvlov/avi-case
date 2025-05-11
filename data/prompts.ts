@@ -1,4 +1,5 @@
 import { DocType } from "@/types/medical";
+const LanguageFilter = " The texts you are given are in German. You must translate all relevant information into English. Do NOT include any German text in your output."
 export const PROMPTS: Record<DocType, string> = {
   [DocType.VACCINEPASS]: `
     You are an expert OCR-and-data-extraction engine tasked with converting all printed and encoded fields from a German vaccine pass into a strict JSON format.
@@ -45,7 +46,7 @@ export const PROMPTS: Record<DocType, string> = {
     Ensure all keys are enclosed in double quotes and strings are properly quoted. Do not include trailing commas.
 
     If any fields are missing or unclear, use null.
-  `,
+  ` + LanguageFilter,
   [DocType.DOCUMENT]: `
     You are given one or more images of German-language doctor’s notes as text.
     Your task is to extract all relevant medical information and output it as a structured JSON object following the exact schema below.
@@ -115,12 +116,12 @@ export const PROMPTS: Record<DocType, string> = {
     Ensure all keys are enclosed in double quotes and strings are properly quoted. Do not include trailing commas.
     Include every field from the schema. For example, even if no temperature is listed, output "temperature_c": null under vitals.
     Be conservative with uncertain information. If a field cannot be reliably read or is missing, use null (or an empty list for list fields) rather than guessing.
-  `,
+  ` + LanguageFilter,
   [DocType.INSURANCECARD]: `You are an expert OCR-and-data-extraction engine tasked with converting all printed and encoded fields from a German electronic Gesundheitskarte (eGK) into a strict   JSON format. Follow these rules exactly:
     1. *Schema* – always output a single JSON object with these keys (in this order):
       {
         "insurerName": string,        // full official name of the Krankenkasse
-        "insurerId": string,          // Kassen­identifikationsnummer (numeric string)
+        "insurerId": string,          // Kassenidentifikationsnummer (numeric string)
         "memberId": string,           // Versicherungsnummer on the card
         "givenName": string,          // Vorname
         "familyName": string,         // Nachname
@@ -139,6 +140,6 @@ export const PROMPTS: Record<DocType, string> = {
     6. *Accuracy* – expand any known abbreviations in insurer names to the full official name.
 
     User:
-    Below is the raw text (OCR) and any visible codes from the card. Parse and return JSON.`,
+    Below is the raw text (OCR) and any visible codes from the card. Parse and return JSON.` + LanguageFilter,
   [DocType.RAW]: "Extract all visible text into one string.",
 };
