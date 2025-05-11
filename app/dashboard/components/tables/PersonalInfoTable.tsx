@@ -1,10 +1,10 @@
 "use client";
 
-import { InsuranceCardData } from "@/types/medical";
+import { InsuranceCard } from "@/types/medical";
 import { format } from "date-fns";
 
 interface PersonalInfoTableProps {
-  info: InsuranceCardData;
+  info: InsuranceCard;
 }
 
 interface InfoRowProps {

@@ -1,4 +1,4 @@
-import { InsuranceCardData } from "@/types/medical";
+import { InsuranceCard } from "@/types/medical";
 
 
 export interface TimelineItem {
@@ -34,5 +34,5 @@ export interface CategoryItem {
 }
 
 export interface PersonalInfoItem {
-  insuranceData: InsuranceCardData;
+  insuranceData: InsuranceCard;
 }

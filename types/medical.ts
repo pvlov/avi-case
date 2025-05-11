@@ -75,11 +75,13 @@ export interface InsuranceCard {
   givenName: string;
   familyName: string;
   dateOfBirth: Date;
-  personalNumber: string;
-  insuranceNumber: string;
-  insuranceName: string;
+  insurerName: string;
+  insurerId: string;
+  memberId: string;
   cardNumber: string;
-  validUntil: Date;
+  cardSerialNumber: string;
+  validFrom: Date;
+  validTo: Date;
 }
 
 export enum DocType {

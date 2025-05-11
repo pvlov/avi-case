@@ -1,5 +1,5 @@
 import { TimelineItem, CategoryItem, PersonalInfoItem } from "@/types/dashboard";
-import { MedicalDocument, Vaccination, DocType, Medication, Procedure } from "@/types/medical";
+import { MedicalDocument, VaccinationEntry, DocType, Medication, Procedure } from "@/types/medical";
 
 export interface MedicalData {
   documents: TimelineItem[];
@@ -39,7 +39,7 @@ function convertMedicationsToCategory(
   }));
 }
 
-function convertVaccinationToCategory(vac: Vaccination): CategoryItem & Partial<Vaccination> {
+function convertVaccinationToCategory(vac: VaccinationEntry): CategoryItem & Partial<VaccinationEntry> {
   return {
     id: crypto.randomUUID(),
     title: `${vac.vaccine} ${vac.trade_name ? `(${vac.trade_name})` : ""}`,
@@ -265,7 +265,7 @@ export async function fetchMedicalData(): Promise<MedicalData> {
       },
     ];
 
-    const mockVaccinations: Vaccination[] = [
+    const mockVaccinations: VaccinationEntry[] = [
       {
         vaccine: "COVID-19",
         date: new Date("2024-01-20"),
