@@ -475,14 +475,6 @@ export default function MedicalDocumentStep() {
                     </Card>
                   ))}
                 </div>
-              <div className="flex justify-end mt-4">
-                <Button 
-                  onClick={processAllBatches}
-                  disabled={isSubmitting || fileBatches.every(b => b.isProcessed)}
-                >
-                  Process All Documents
-                </Button>
-              </div>
             </div>
           )}
         </div>
