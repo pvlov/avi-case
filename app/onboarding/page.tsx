@@ -7,12 +7,14 @@ import { Step } from "@/types/patient";
 import StepProgressIndicator from "./components/StepProgressIndicator";
 import { Button } from "@/components/ui/button";
 import { ChevronLeft, ChevronRight } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import InsuranceStep from "./components/DocTypeComponents/InsuranceCard/InsuranceStep";
 import MedicalDocumentStep from "./components/DocTypeComponents/MedicalDocument/MedicalDocumentStep";
 import VaccinationStep from "./components/DocTypeComponents/Vaccinations/VaccinationStep";
 import { DocType } from "@/types/medical";
 import ReasonForVisitStep from "@/app/onboarding/components/DocTypeComponents/ReasonForVisitStep";
+import { useMedicalStore } from "@/lib/store";
+import { useRouter } from "next/navigation";
 
 // Define step configuration with DocType as the single source of truth
 interface OnboardingStep extends Step {
@@ -57,20 +59,45 @@ const steps: OnboardingStep[] = [
   {
     stepNum: 3,
     label: "Vaccination Records",
-    description: "Upload your vaccination records, including any previous vaccinations or boosters.",
+    description:
+      "Upload your vaccination records, including any previous vaccinations or boosters.",
     docType: DocType.VACCINEPASS,
   },
   {
     stepNum: 4,
     label: "Medical Documents",
-    description: "Upload your medical documents, including any previous illnesses, medications, conditions and treatments.",
+    description:
+      "Upload your medical documents, including any previous illnesses, medications, conditions and treatments.",
     docType: DocType.DOCUMENT,
   },
 ];
 
 export default function Onboarding() {
+  const router = useRouter();
+  const isSignedIn = useMedicalStore((state) => state.isSignedIn);
   const [currentStepNum, setCurrentStepNum] = useState(1);
   const currentStep = steps.find((step) => step.stepNum === currentStepNum)!;
+
+  // Redirect to home if not signed in
+  useEffect(() => {
+    if (!isSignedIn) {
+      router.push("/");
+    }
+  }, [isSignedIn, router]);
+
+  // If not signed in, show a message briefly before redirect
+  if (!isSignedIn) {
+    return (
+      <Section className="flex min-h-[calc(100vh-3.5rem)] items-center justify-center">
+        <Card className="max-w-md">
+          <CardHeader>
+            <CardTitle>Authentication Required</CardTitle>
+            <CardDescription>Please sign in to access the onboarding process.</CardDescription>
+          </CardHeader>
+        </Card>
+      </Section>
+    );
+  }
 
   const handleNext = () => {
     if (currentStepNum < steps.length) {

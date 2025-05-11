@@ -1,9 +1,14 @@
+"use client";
+
 import { Section } from "@/components/section";
 import { BlurrySquares } from "@/components/BlurrySquares";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
+import { useMedicalStore } from "@/lib/store";
 
 export default function Home() {
+  const isSignedIn = useMedicalStore((state) => state.isSignedIn);
+
   return (
     <Section
       variant="screenCentered"
@@ -23,9 +28,11 @@ export default function Home() {
           medical records, insurance information, and more in one place with powerful automation.
         </p>
         <div className="flex flex-wrap justify-center gap-4">
-          <Button asChild size="lg">
-            <Link href="/onboarding">Onboarding</Link>
-          </Button>
+          {isSignedIn && (
+            <Button asChild size="lg">
+              <Link href="/onboarding">Onboarding</Link>
+            </Button>
+          )}
         </div>
       </div>
     </Section>

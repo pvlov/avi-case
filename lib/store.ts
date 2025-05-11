@@ -28,10 +28,13 @@ interface MedicalStore {
   records: MedicalRecord[];
   isLoading: boolean;
   currentStep: number;
+  isSignedIn: boolean;
 
   // User actions
   setCurrentUser: (user: UserProfile) => void;
   clearCurrentUser: () => void;
+  signIn: () => void;
+  signOut: () => void;
 
   // Record actions
   addRecord: (record: Omit<MedicalRecord, "id" | "createdAt" | "updatedAt">) => void;
@@ -63,10 +66,13 @@ export const useMedicalStore = create<MedicalStore>()(
       records: [],
       isLoading: false,
       currentStep: 1,
+      isSignedIn: false,
 
       // User actions
       setCurrentUser: (user) => set({ currentUser: user }),
       clearCurrentUser: () => set({ currentUser: null }),
+      signIn: () => set({ isSignedIn: true }),
+      signOut: () => set({ isSignedIn: false }),
 
       // Record actions
       addRecord: (record) =>
@@ -121,6 +127,7 @@ export const useMedicalStore = create<MedicalStore>()(
         // Only persist these parts of the store
         currentUser: state.currentUser,
         records: state.records,
+        isSignedIn: state.isSignedIn,
         // Don't persist UI state like isLoading or currentStep
       }),
     },
