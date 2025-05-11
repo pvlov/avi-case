@@ -35,17 +35,21 @@ export function TimelineView({ items, onHover }: TimelineViewProps) {
                   item.isHighlighted && "ring-primary ring-2",
                 )}
               >
-                <CardContent className="p-4">
-                  <div className="mb-1 flex items-center justify-between text-sm">
-                    <div className="flex items-center gap-1.5">
-                      <Clock className="text-muted-foreground h-3.5 w-3.5" />
+                <CardContent>
+                  <div className="flex flex-col gap-1">
+                    <div className="flex items-center gap-1.5 text-sm">
+                      <Clock className="text-muted-foreground h-3.5 w-3.5 flex-shrink-0" />
                       <span className="text-muted-foreground">
                         {format(item.date, "MMM dd, yyyy")}
                       </span>
                     </div>
-                    <span className="text-muted-foreground">{item.doctorName}</span>
+                    {item.doctorName && (
+                      <div className="text-sm text-muted-foreground truncate">
+                        {item.doctorName}
+                      </div>
+                    )}
+                    <h3 className="text-sm font-medium pt-1">{item.title}</h3>
                   </div>
-                  <h3 className="text-sm font-medium">{item.title}</h3>
                 </CardContent>
               </Card>
             </div>
