@@ -18,15 +18,17 @@ export function TimelineView({ items, onHover }: TimelineViewProps) {
         <Calendar className="h-6 w-6" />
         Medical Timeline
       </h2>
-      <div className="relative pl-8">
-        {/* Vertical Timeline Line */}
-        <div className="bg-border absolute top-0 bottom-0 left-3 w-0.5" />
-
-        <div className="space-y-6">
+      <div className="relative">
+        {/* Container for line and dots */}
+        <div className="absolute left-4 top-0 bottom-0 w-[2px] bg-border">
+          {/* This is the vertical line */}
+        </div>
+        
+        <div className="space-y-6 pl-12">
           {items.map((item) => (
             <div key={item.id} className="relative">
               {/* Timeline Dot */}
-              <div className="absolute left-[1px] top-1/2 -translate-x-1/2 -translate-y-1/2 w-3 h-3 rounded-full bg-primary ring-4 ring-background" />
+              <div className="absolute -left-[37px] top-1/2 -translate-y-1/2 w-3 h-3 rounded-full bg-primary ring-4 ring-background z-10" />
               <Card 
                 className={cn(
                   "hover:bg-accent/50 transition-colors duration-200",
