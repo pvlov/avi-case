@@ -73,7 +73,7 @@ export function transformStoreDataToDashboard(): MedicalData {
     .filter(record => record.docType === DocType.DOCUMENT)
     .map(record => ({
       id: record.id,
-      date: record.createdAt,
+      date: new Date((record.data as MedicalDocument).dateIssued || record.createdAt),
       type: "document",
       title: record.title,
       description: record.notes || "",
