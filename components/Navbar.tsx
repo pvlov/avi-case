@@ -39,6 +39,8 @@ export function Navbar() {
       {/* Primary nav links */}
       <NavigationMenu>
         <NavigationMenuList>
+      <NavigationMenu className="w-full">
+        <NavigationMenuList className="flex justify-center md:justify-start w-full">
           <NavigationMenuItem>
             <Link href="/" className={navigationMenuTriggerStyle()}>
               Home
@@ -48,6 +50,26 @@ export function Navbar() {
             <Link href="/dashboard" className={navigationMenuTriggerStyle()}>
               Dashboard
             </Link>
+            <NavigationMenuLink
+              className={cn(
+                navigationMenuTriggerStyle(),
+                "hover:bg-avi-green/20 bg-transparent transition-all duration-300",
+              )}
+              asChild
+            >
+              <Link href="/onboarding">Onboarding</Link>
+            </NavigationMenuLink>
+          </NavigationMenuItem>
+          <NavigationMenuItem>
+            <NavigationMenuLink
+              className={cn(
+                navigationMenuTriggerStyle(),
+                "hover:bg-avi-green/20 bg-transparent transition-all duration-300",
+              )}
+              asChild
+            >
+              <Link href="/dashboard">Dashboard</Link>
+            </NavigationMenuLink>
           </NavigationMenuItem>
         </NavigationMenuList>
       </NavigationMenu>

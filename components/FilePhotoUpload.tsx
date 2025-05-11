@@ -1,7 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Camera, CameraIcon, File, Upload, X } from "lucide-react";
-import { useState, useRef, useCallback, useEffect } from "react";
+import { useState, useRef, useCallback, useEffect, forwardRef } from "react";
 import Webcam from "react-webcam";
 
 interface FilePhotoUploadProps {
@@ -13,20 +13,21 @@ interface FilePhotoUploadProps {
   acceptedFileTypes?: string;
 }
 
-export function FilePhotoUpload({
+export const FilePhotoUpload = forwardRef<HTMLInputElement, FilePhotoUploadProps>(({
   onFilesChange,
   title = "Upload your file",
   subtitle = "PDF, JPG, or PNG (max 10 files)",
   containerClassName = "border-muted-foreground flex flex-col items-center justify-center gap-4 rounded-md border-2 border-dashed p-4",
   maxFiles = 10,
   acceptedFileTypes = ".pdf,.jpg,.jpeg,.png",
-}: FilePhotoUploadProps) {
+}, ref) => {
   const [files, setFiles] = useState<File[]>([]);
   const [isCameraActive, setIsCameraActive] = useState(false);
   const [cameraError, setCameraError] = useState<string | null>(null);
   const [facingMode, setFacingMode] = useState<"user" | "environment">("environment");
   const [isPortrait, setIsPortrait] = useState(false);
   const webcamRef = useRef<Webcam>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
   const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
 
   useEffect(() => {
@@ -46,6 +47,16 @@ export function FilePhotoUpload({
       onFilesChange(files);
     }
   }, [files, onFilesChange]);
+
+  useEffect(() => {
+    if (!ref) return;
+    
+    if (typeof ref === 'function') {
+      ref(inputRef.current);
+    } else {
+      ref.current = inputRef.current;
+    }
+  }, [ref]);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newFiles = Array.from(e.target.files || []);
@@ -112,6 +123,7 @@ export function FilePhotoUpload({
           <div className="flex gap-2">
             <Input
               id="file-upload"
+              ref={inputRef}
               type="file"
               className="hidden"
               accept={acceptedFileTypes}
@@ -134,7 +146,7 @@ export function FilePhotoUpload({
 
           {/* File list */}
           {files.length > 0 && (
-            <div className="mt-4 w-full space-y-2">
+            <div className="mt-4 w-full grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">
               {files.map((file, index) => (
                 <div
                   key={index}
@@ -190,4 +202,4 @@ export function FilePhotoUpload({
       )}
     </div>
   );
-}
+});
