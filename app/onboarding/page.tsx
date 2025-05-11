@@ -31,7 +31,6 @@ const ComponentFactory: ComponentMap = {
   [DocType.INSURANCECARD]: InsuranceStep,
   [DocType.VACCINEPASS]: VaccinationStep,
   [DocType.DOCUMENT]: MedicalDocumentStep,
-  [DocType.RAW]: PrescriptionStep,
   [DocType.REASONFORVISIT]: ReasonForVisitStep, // Placeholder for ReasonForVisitStep
 
   // Get the component for a specific docType

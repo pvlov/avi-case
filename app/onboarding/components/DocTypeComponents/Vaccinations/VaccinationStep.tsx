@@ -146,8 +146,8 @@ export default function VaccinationStep() {
   // Initialize empty vaccination data if none exists
   const getEmptyVaccinationData = (): VaccinationPass => ({
     person: {
-      name: null,
-      date_of_birth: null,
+      name: "",
+      date_of_birth: "",
       gender: null,
     },
     vaccinations: [],
