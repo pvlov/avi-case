@@ -179,19 +179,21 @@ export default function VaccinationStep() {
               <Spinner className="mt-12 mb-12 size-16" />
             </div>
           ) : (
-            <FilePhotoUpload
-              onFilesChange={handleFilesChange}
-              title=""
-              subtitle="PDF, JPG, or PNG (max 10 files)"
-            />
+            <>
+              <FilePhotoUpload
+                onFilesChange={handleFilesChange}
+                title=""
+                subtitle="PDF, JPG, or PNG (max 10 files)"
+              />
+              <Button
+                className="mt-4 w-full"
+                onClick={handleFileUploadSubmit}
+                disabled={isSubmitting || files.length === 0}
+              >
+                Submit
+              </Button>
+            </>
           )}
-          <Button
-            className="mt-4 w-full"
-            onClick={handleFileUploadSubmit}
-            disabled={isLoading || isSubmitting || files.length === 0}
-          >
-            Submit
-          </Button>
         </TabsContent>
         <TabsContent value="manual">
           <ScrollArea className="h-[400px] w-full rounded-md border p-4">
