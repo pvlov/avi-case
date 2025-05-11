@@ -18,7 +18,6 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { useState } from "react";
 
 interface VaccinationTableProps {
   data: VaccinationPass | null;
@@ -46,7 +45,7 @@ export function VaccinationTable({
   data,
   onEditVaccination,
   onAddVaccination,
-  editable = true
+  editable = true,
 }: VaccinationTableProps) {
   if (!data || data.vaccinations.length === 0) {
     return (
@@ -63,17 +62,14 @@ export function VaccinationTable({
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-between">
-        <h3 className="text-lg font-medium">Vaccinations</h3>
-        <Button
-          onClick={onAddVaccination}
-          variant="outline"
-          size="sm"
-          className="h-7 w-7 p-0"
-        >
-          <Plus className="h-4 w-4" />
-        </Button>
-      </div>
+      {editable && (
+        <div className="flex items-center justify-between">
+          <h3 className="text-lg font-medium">Vaccinations</h3>
+          <Button onClick={onAddVaccination} variant="outline" size="sm" className="h-7 w-7 p-0">
+            <Plus className="h-4 w-4" />
+          </Button>
+        </div>
+      )}
 
       {/* Mobile Accordion */}
       <div className="md:hidden">
@@ -115,7 +111,7 @@ export function VaccinationTable({
                   </div>
                   <div className="grid grid-cols-2">
                     <span className="text-muted-foreground">Doctor</span>
-                    <span className="truncate max-w-[150px]">{vax.doctor || "N/A"}</span>
+                    <span className="max-w-[150px] truncate">{vax.doctor || "N/A"}</span>
                   </div>
                 </div>
               </AccordionContent>
@@ -149,7 +145,7 @@ export function VaccinationTable({
                 <TableCell>{vax.trade_name || "N/A"}</TableCell>
                 <TableCell>{vax.batch_number || "N/A"}</TableCell>
                 <TableCell className="max-w-[150px]">
-                  <span className="truncate block">{vax.doctor || "N/A"}</span>
+                  <span className="block truncate">{vax.doctor || "N/A"}</span>
                 </TableCell>
                 {editable && (
                   <TableCell>
